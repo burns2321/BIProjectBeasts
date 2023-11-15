@@ -1,0 +1,304 @@
+---
+title: "Business Intelligence Project"
+output:
+  github_document: 
+    toc: yes
+    toc_depth: 4
+    fig_width: 6
+    fig_height: 4
+    df_print: default
+editor_options:
+  chunk_output_type: console
+---
+
+# Student Details
+
+|                                              |                             |
+|--------------------------------------------|----------------------------|
+| **Student ID Number**                        | 119630,135844,131038,104135 |
+| **Student Name**                             | beasts                      |
+| **BBIT 4.2 Group**                           | A&B&C                       |
+| **BI Project Group Name/ID (if applicable)** | beasts                      |
+
+# Setup Chunk
+
+**Note:** the following KnitR options have been set as the global defaults: <BR> `knitr::opts_chunk$set(echo = TRUE, warning = FALSE, eval = TRUE, collapse = FALSE, tidy = TRUE)`.
+
+More KnitR options are documented here <https://bookdown.org/yihui/rmarkdown-cookbook/chunk-options.html> and here <https://yihui.org/knitr/options/>.
+
+```{r setup, include=FALSE}
+library(formatR)
+knitr::opts_chunk$set(
+  warning = FALSE,
+  collapse = FALSE
+)
+```
+
+## Load dataset
+
+```{r}
+insurance <- read.csv("data/insurance_info.csv")
+
+```
+
+# Handle missing values ----
+
+### Are there missing values in the dataset?
+
+```{r}
+library(tidyverse)
+
+anyNA(insurance)
+```
+
+### How many?
+
+```{r}
+library(naniar)
+
+n_miss(insurance)
+```
+
+### What is the proportion of missing data in the entire dataset?
+
+```{r}
+prop_miss(insurance)
+```
+
+### What is the number and percentage of missing values grouped by each variable?
+
+```{r}
+miss_var_summary(insurance)
+```
+
+### Which variables contain the most missing values?
+
+```{r}
+gg_miss_var(insurance)
+```
+
+## Remove the observations with missing values ----
+
+```{r}
+insurance_obs <- insurance %>% filter(complete.cases(.))
+dim(insurance_obs)
+```
+
+#### Are there missing values in the dataset?
+
+```{r}
+any_na(insurance_obs)
+```
+
+# Exploratory Data Analysis
+
+### Dimensions
+
+```{r}
+# display the dimensions of your datasets
+dim(insurance_obs)
+#Identify the Data Types
+sapply(insurance_obs, class)
+```
+
+## Descriptive Statistics
+
+### Measures of frequency
+
+```{r}
+insurance_obs_freq <- insurance_obs$age
+cbind(frequency = table(insurance_obs_freq),
+      percentage = prop.table(table(insurance_obs_freq)) * 100)
+```
+
+### Measures of central tendency
+
+```{r}
+insurance_obs_mode <- names(table(insurance_obs$age))[
+  which(table(insurance_obs$age) == max(table(insurance_obs$age)))
+]
+print(insurance_obs_mode)
+```
+
+### Measures of distribution
+
+#### Measure the variance of the age variable
+
+```{r}
+var(insurance_obs[, 6])
+
+```
+
+#### Measure the standard deviation of age variable
+
+```{r}
+sd(insurance_obs[, 6] )
+```
+
+#### Measure the kurtosis of each age variable
+
+```{r}
+library(moments)
+
+kurtosis(insurance_obs[, 6], na.rm = TRUE)
+```
+
+#### Measure the skewness of each variable
+
+```{r}
+skewness(insurance_obs[, 6])
+```
+
+### Measures of relationship
+
+#### Measure the covariance between variables
+
+```{r}
+insurance_obs_cov <- cov(insurance_obs[,c(2, 6)])
+View(insurance_obs_cov)
+```
+
+#### Measure the correlation between variables
+
+```{r}
+insurance_obs_cor <- cor(insurance_obs[, c(2, 6)])
+View(insurance_obs_cor)
+```
+
+## Inferential statistics
+
+### Perform ANOVA
+
+#### One-Way ANOVA
+
+```{r}
+insurance_obs_one_way_anova <- aov(age ~ rating, data = insurance_obs)
+summary(insurance_obs_one_way_anova)
+```
+
+#### Two-Way ANOVA
+
+```{r}
+insurance_obs_additive_two_way_anova <- aov(age ~ rating + packagePrice, # nolint
+                                           data = insurance_obs)
+summary(insurance_obs_additive_two_way_anova)
+```
+
+## Basic Visualization
+
+### Univariate plots
+
+#### create histograms
+
+```{r}
+par(mar = c(4, 4, 2, 2)) 
+
+insurance_obs_yield <- as.numeric(unlist(insurance_obs[, 6]))
+hist(insurance_obs_yield, main = names(insurance_obs)[6])
+
+```
+
+#### Create Box and Whisker Plots for Each Numeric Attribute
+
+```{r}
+boxplot(insurance_obs[, 6], main = names(insurance_obs)[6])
+boxplot(insurance_obs[, 2], main = names(insurance_obs)[2])
+boxplot(insurance_obs[, 8], main = names(insurance_obs)[8])
+```
+
+#### Create Bar Plots for Each Categorical Attribute
+
+```{r}
+barplot(table(insurance_obs[, 3]), main = names(insurance_obs)[3])
+```
+
+### Multivariate Plots
+
+#### Create a Correlation Plot
+
+```{r}
+library(corrplot)
+
+corrplot(cor(insurance_obs[, c(2, 6)]), method = "circle")
+```
+
+## Qualitative Data Analysis
+
+### Customize the Visualizations, Tables, and Colour Scheme
+
+#### blue-grey colour scheme for the visualizations
+
+```{r}
+blue_grey_colours_11 <- c("#27408E", "#304FAF", "#536CB5", "#6981c7", "#8da0db", "#dde5ec", "#c8c9ca", "#B9BCC2", "#A7AAAF", "#888A8E", "#636569")
+
+blue_grey_colours_6 <- c("#27408E", "#304FAF", "#536CB5", "#B9BCC2", "#A7AAAF", "#888A8E")
+
+blue_grey_colours_4 <- c("#27408E", "#536CB5", "#B9BCC2", "#888A8E")
+
+blue_grey_colours_2 <- c("#27408E", "#888A8E")
+
+blue_grey_colours_1 <- c("#6981c7")
+```
+
+#### Custom theme for visualizations
+
+```{r}
+blue_grey_theme <- function() {
+  theme(
+    axis.ticks = element_line(
+                              linewidth = 1, linetype = "dashed",
+                              lineend = NULL, color = "#dfdede",
+                              arrow = NULL, inherit.blank = FALSE),
+    axis.text = element_text(
+                             face = "bold", color = "#3f3f41",
+                             size = 12, hjust = 0.5),
+    axis.title = element_text(face = "bold", color = "#3f3f41",
+                              size = 14, hjust = 0.5),
+    plot.title = element_text(face = "bold", color = "#3f3f41",
+                              size = 16, hjust = 0.5),
+    panel.grid = element_line(
+                              linewidth = 0.1, linetype = "dashed",
+                              lineend = NULL, color = "#dfdede",
+                              arrow = NULL, inherit.blank = FALSE),
+    panel.background = element_rect(fill = "#f3eeee"),
+    legend.title = element_text(face = "plain", color = "#3f3f41",
+                                size = 12, hjust = 0),
+    legend.position = "right"
+  )
+}
+```
+
+#### Customize the text tables for consistency using HTML formatting
+
+```{r}
+kable_theme <- function(dat, caption) {
+  kable(dat, "html", escape = FALSE, caption = caption) %>%
+    kable_styling(bootstrap_options = c("striped", "condensed", "bordered"),
+                  full_width = FALSE)
+}
+```
+
+### Contractions
+
+#### removal of special characters and conversion of lowercase
+
+```{r}
+remove_special_characters <- function(doc) {
+  gsub("[^a-zA-Z0-9 ]", "", doc, ignore.case = TRUE)
+}
+
+
+insurance_obs$preIllness <- sapply(insurance_obs$preIllness, tolower) # nolint
+insurance_obs$services <- sapply(insurance_obs$services, tolower) # nolint
+insurance_obs$packageType <- sapply(insurance_obs$packageType, tolower) # nolint
+insurance_obs$priceRage <- sapply(insurance_obs$priceRage, tolower) # nolint
+View(insurance_obs)
+```
+
+# Pre-prosessing and Data Transformation
+
+# Training the Model
+
+# Hyper-parameter Tuning and Ensembles
+
+# Consolidation
