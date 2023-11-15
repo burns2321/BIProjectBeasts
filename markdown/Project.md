@@ -3,21 +3,7 @@ Business Intelligence Project
 
 - [Student Details](#student-details)
 - [Setup Chunk](#setup-chunk)
-  - [Load dataset](#load-dataset)
-- [Handle missing values —-](#handle-missing-values--)
-  - [Are there missing values in the
-    dataset?](#are-there-missing-values-in-the-dataset)
-  - [How many?](#how-many)
-  - [What is the proportion of missing data in the entire
-    dataset?](#what-is-the-proportion-of-missing-data-in-the-entire-dataset)
-  - [What is the number and percentage of missing values grouped by each
-    variable?](#what-is-the-number-and-percentage-of-missing-values-grouped-by-each-variable)
-  - [Which variables contain the most missing
-    values?](#which-variables-contain-the-most-missing-values)
-  - [Remove the observations with missing values
-    —-](#remove-the-observations-with-missing-values--)
-    - [Are there missing values in the
-      dataset?](#are-there-missing-values-in-the-dataset-1)
+- [Load dataset](#load-dataset)
 - [Exploratory Data Analysis](#exploratory-data-analysis)
   - [Dimensions](#dimensions)
   - [Descriptive Statistics](#descriptive-statistics)
@@ -51,19 +37,33 @@ Business Intelligence Project
     - [Multivariate Plots](#multivariate-plots)
       - [Create a Correlation Plot](#create-a-correlation-plot)
   - [Qualitative Data Analysis](#qualitative-data-analysis)
-    - [Customize the Visualizations, Tables, and Colour
-      Scheme](#customize-the-visualizations-tables-and-colour-scheme)
-      - [blue-grey colour scheme for the
-        visualizations](#blue-grey-colour-scheme-for-the-visualizations)
-      - [Custom theme for
-        visualizations](#custom-theme-for-visualizations)
-      - [Customize the text tables for consistency using HTML
-        formatting](#customize-the-text-tables-for-consistency-using-html-formatting)
-    - [Contractions](#contractions)
-      - [removal of special characters and conversion of
-        lowercase](#removal-of-special-characters-and-conversion-of-lowercase)
+  - [Contractions](#contractions)
+    - [removal of special characters and conversion of
+      lowercase](#removal-of-special-characters-and-conversion-of-lowercase)
 - [Pre-prosessing and Data
   Transformation](#pre-prosessing-and-data-transformation)
+  - [Handle missing values —-](#handle-missing-values--)
+    - [Are there missing values in the
+      dataset?](#are-there-missing-values-in-the-dataset)
+    - [How many?](#how-many)
+    - [What is the proportion of missing data in the entire
+      dataset?](#what-is-the-proportion-of-missing-data-in-the-entire-dataset)
+    - [How many missing values does each variable
+      have?](#how-many-missing-values-does-each-variable-have)
+    - [What is the number and percentage of missing values grouped by
+      each
+      variable?](#what-is-the-number-and-percentage-of-missing-values-grouped-by-each-variable)
+    - [What is the number and percentage of missing values grouped by
+      each
+      observation?](#what-is-the-number-and-percentage-of-missing-values-grouped-by-each-observation)
+    - [Which variables contain the most missing
+      values?](#which-variables-contain-the-most-missing-values)
+    - [Where are missing values located (the shaded regions in the
+      plot)?](#where-are-missing-values-located-the-shaded-regions-in-the-plot)
+  - [Remove the observations with missing
+    values](#remove-the-observations-with-missing-values)
+    - [Are there missing values in the
+      dataset?](#are-there-missing-values-in-the-dataset-1)
 - [Training the Model](#training-the-model)
 - [Hyper-parameter Tuning and
   Ensembles](#hyper-parameter-tuning-and-ensembles)
@@ -88,13 +88,303 @@ More KnitR options are documented here
 <https://bookdown.org/yihui/rmarkdown-cookbook/chunk-options.html> and
 here <https://yihui.org/knitr/options/>.
 
-## Load dataset
+# Load dataset
 
 ``` r
 insurance <- read.csv("data/insurance_info.csv")
 ```
 
-# Handle missing values —-
+# Exploratory Data Analysis
+
+### Dimensions
+
+``` r
+# display the dimensions of your datasets
+dim(insurance)
+```
+
+    ## [1] 19999     9
+
+``` r
+#Identify the Data Types
+sapply(insurance, class)
+```
+
+    ## insurance.name   packagePrice       services      priceRage    packageType 
+    ##    "character"      "integer"    "character"    "character"    "character" 
+    ##            age     preIllness         rating  transactionNo 
+    ##      "integer"    "character"      "numeric"    "character"
+
+## Descriptive Statistics
+
+### Measures of frequency
+
+``` r
+insurance_freq <- insurance$age
+cbind(frequency = table(insurance_freq),
+      percentage = prop.table(table(insurance_freq)) * 100)
+```
+
+    ##    frequency percentage
+    ## 0        235   1.175059
+    ## 1        252   1.260063
+    ## 2        246   1.230062
+    ## 3        244   1.220061
+    ## 4        240   1.200060
+    ## 5        266   1.330067
+    ## 6        243   1.215061
+    ## 7        231   1.155058
+    ## 8        232   1.160058
+    ## 9        234   1.170059
+    ## 10       294   1.470074
+    ## 11       242   1.210061
+    ## 12       251   1.255063
+    ## 13       254   1.270064
+    ## 14       250   1.250063
+    ## 15       254   1.270064
+    ## 16       254   1.270064
+    ## 17       260   1.300065
+    ## 18       254   1.270064
+    ## 19       269   1.345067
+    ## 20       259   1.295065
+    ## 21       256   1.280064
+    ## 22       274   1.370069
+    ## 23       232   1.160058
+    ## 24       271   1.355068
+    ## 25       270   1.350068
+    ## 26       260   1.300065
+    ## 27       219   1.095055
+    ## 28       237   1.185059
+    ## 29       266   1.330067
+    ## 30       235   1.175059
+    ## 31       244   1.220061
+    ## 32       245   1.225061
+    ## 33       240   1.200060
+    ## 34       253   1.265063
+    ## 35       273   1.365068
+    ## 36       238   1.190060
+    ## 37       233   1.165058
+    ## 38       230   1.150058
+    ## 39       260   1.300065
+    ## 40       230   1.150058
+    ## 41       223   1.115056
+    ## 42       271   1.355068
+    ## 43       280   1.400070
+    ## 44       258   1.290065
+    ## 45       253   1.265063
+    ## 46       251   1.255063
+    ## 47       220   1.100055
+    ## 48       236   1.180059
+    ## 49       257   1.285064
+    ## 50       222   1.110056
+    ## 51       240   1.200060
+    ## 52       273   1.365068
+    ## 53       258   1.290065
+    ## 54       251   1.255063
+    ## 55       241   1.205060
+    ## 56       255   1.275064
+    ## 57       238   1.190060
+    ## 58       248   1.240062
+    ## 59       217   1.085054
+    ## 60       247   1.235062
+    ## 61       238   1.190060
+    ## 62       245   1.225061
+    ## 63       212   1.060053
+    ## 64       251   1.255063
+    ## 65       259   1.295065
+    ## 66       240   1.200060
+    ## 67       253   1.265063
+    ## 68       239   1.195060
+    ## 69       230   1.150058
+    ## 70       225   1.125056
+    ## 71       229   1.145057
+    ## 72       235   1.175059
+    ## 73       266   1.330067
+    ## 74       247   1.235062
+    ## 75       234   1.170059
+    ## 76       249   1.245062
+    ## 77       235   1.175059
+    ## 78       275   1.375069
+    ## 79       234   1.170059
+    ## 80       234   1.170059
+
+### Measures of central tendency
+
+``` r
+insurance_mode <- names(table(insurance$age))[
+  which(table(insurance$age) == max(table(insurance$age)))
+]
+print(insurance_mode)
+```
+
+    ## [1] "10"
+
+### Measures of distribution
+
+#### Measure the variance of the age variable
+
+``` r
+var(insurance[, 6])
+```
+
+    ## [1] 543.9234
+
+#### Measure the standard deviation of age variable
+
+``` r
+sd(insurance[, 6] )
+```
+
+    ## [1] 23.32216
+
+#### Measure the kurtosis of each age variable
+
+``` r
+library(moments)
+
+kurtosis(insurance[, 6], na.rm = TRUE)
+```
+
+    ## [1] 1.803244
+
+#### Measure the skewness of each variable
+
+``` r
+skewness(insurance[, 6])
+```
+
+    ## [1] 0.02437794
+
+### Measures of relationship
+
+#### Measure the covariance between variables
+
+``` r
+insurance_cov <- cov(insurance[,c(8, 6)])
+View(insurance_cov)
+```
+
+#### Measure the correlation between variables
+
+``` r
+insurance_cor <- cor(insurance[, c(8, 6)])
+View(insurance_cor)
+```
+
+## Inferential statistics
+
+### Perform ANOVA
+
+#### One-Way ANOVA
+
+``` r
+insurance_one_way_anova <- aov(age ~ rating, data = insurance)
+summary(insurance_one_way_anova)
+```
+
+    ##                Df   Sum Sq Mean Sq F value Pr(>F)  
+    ## rating          1     1524  1523.6   2.801 0.0942 .
+    ## Residuals   19997 10875856   543.9                 
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+#### Two-Way ANOVA
+
+``` r
+insurance_additive_two_way_anova <- aov(age ~ rating + packagePrice, # nolint
+                                           data = insurance)
+summary(insurance_additive_two_way_anova)
+```
+
+    ##                 Df   Sum Sq Mean Sq F value Pr(>F)  
+    ## rating           1     1729  1728.9   3.185 0.0743 .
+    ## packagePrice     1     1062  1061.7   1.956 0.1620  
+    ## Residuals    18606 10099494   542.8                 
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 1390 observations deleted due to missingness
+
+## Basic Visualization
+
+### Univariate plots
+
+#### create histograms
+
+``` r
+par(mar = c(4, 4, 2, 2)) 
+
+insurance_yield <- as.numeric(unlist(insurance[, 6]))
+hist(insurance_yield, main = names(insurance)[6])
+```
+
+![](Project_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+#### Create Box and Whisker Plots for Each Numeric Attribute
+
+``` r
+boxplot(insurance[, 6], main = names(insurance)[6])
+```
+
+![](Project_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+``` r
+boxplot(insurance[, 2], main = names(insurance)[2])
+```
+
+![](Project_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
+
+``` r
+boxplot(insurance[, 8], main = names(insurance)[8])
+```
+
+![](Project_files/figure-gfm/unnamed-chunk-14-3.png)<!-- -->
+
+#### Create Bar Plots for Each Categorical Attribute
+
+``` r
+barplot(table(insurance[, 3]), main = names(insurance)[3])
+```
+
+![](Project_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+
+### Multivariate Plots
+
+#### Create a Correlation Plot
+
+``` r
+library(corrplot)
+```
+
+    ## corrplot 0.92 loaded
+
+``` r
+corrplot(cor(insurance[, c(2, 6)]), method = "circle")
+```
+
+![](Project_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
+## Qualitative Data Analysis
+
+## Contractions
+
+### removal of special characters and conversion of lowercase
+
+``` r
+remove_special_characters <- function(doc) {
+  gsub("[^a-zA-Z0-9 ]", "", doc, ignore.case = TRUE)
+}
+
+
+insurance$preIllness <- sapply(insurance$preIllness, tolower) # nolint
+insurance$services <- sapply(insurance$services, tolower) # nolint
+insurance$packageType <- sapply(insurance$packageType, tolower) # nolint
+insurance$priceRage <- sapply(insurance$priceRage, tolower) # nolint
+View(insurance)
+```
+
+# Pre-prosessing and Data Transformation
+
+## Handle missing values —-
 
 ### Are there missing values in the dataset?
 
@@ -137,6 +427,17 @@ prop_miss(insurance)
 
     ## [1] 0.007722608
 
+### How many missing values does each variable have?
+
+``` r
+insurance %>% is.na() %>% colSums()
+```
+
+    ## insurance.name   packagePrice       services      priceRage    packageType 
+    ##              0           1390              0              0              0 
+    ##            age     preIllness         rating  transactionNo 
+    ##              0              0              0              0
+
 ### What is the number and percentage of missing values grouped by each variable?
 
 ``` r
@@ -156,15 +457,47 @@ miss_var_summary(insurance)
     ## 8 rating              0     0   
     ## 9 transactionNo       0     0
 
+### What is the number and percentage of missing values grouped by each observation?
+
+``` r
+miss_case_summary(insurance)
+```
+
+    ## # A tibble: 19,999 × 3
+    ##     case n_miss pct_miss
+    ##    <int>  <int>    <dbl>
+    ##  1   217      1     11.1
+    ##  2   302      1     11.1
+    ##  3   304      1     11.1
+    ##  4   381      1     11.1
+    ##  5   418      1     11.1
+    ##  6   424      1     11.1
+    ##  7   642      1     11.1
+    ##  8   982      1     11.1
+    ##  9  1045      1     11.1
+    ## 10  1159      1     11.1
+    ## # ℹ 19,989 more rows
+
 ### Which variables contain the most missing values?
 
 ``` r
 gg_miss_var(insurance)
 ```
 
-![](Project_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](Project_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
-## Remove the observations with missing values —-
+### Where are missing values located (the shaded regions in the plot)?
+
+``` r
+library(naniar)
+library(ggplot2)
+
+vis_miss(insurance) + theme(axis.text.x = element_text(angle = 80))
+```
+
+![](Project_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+
+## Remove the observations with missing values
 
 ``` r
 insurance_obs <- insurance %>% filter(complete.cases(.))
@@ -180,349 +513,6 @@ any_na(insurance_obs)
 ```
 
     ## [1] FALSE
-
-# Exploratory Data Analysis
-
-### Dimensions
-
-``` r
-# display the dimensions of your datasets
-dim(insurance_obs)
-```
-
-    ## [1] 18609     9
-
-``` r
-#Identify the Data Types
-sapply(insurance_obs, class)
-```
-
-    ## insurance.name   packagePrice       services      priceRage    packageType 
-    ##    "character"      "integer"    "character"    "character"    "character" 
-    ##            age     preIllness         rating  transactionNo 
-    ##      "integer"    "character"      "numeric"    "character"
-
-## Descriptive Statistics
-
-### Measures of frequency
-
-``` r
-insurance_obs_freq <- insurance_obs$age
-cbind(frequency = table(insurance_obs_freq),
-      percentage = prop.table(table(insurance_obs_freq)) * 100)
-```
-
-    ##    frequency percentage
-    ## 0        217   1.166102
-    ## 1        230   1.235961
-    ## 2        231   1.241335
-    ## 3        229   1.230587
-    ## 4        219   1.176850
-    ## 5        252   1.354183
-    ## 6        226   1.214466
-    ## 7        216   1.160729
-    ## 8        212   1.139234
-    ## 9        220   1.182224
-    ## 10       272   1.461658
-    ## 11       225   1.209092
-    ## 12       233   1.252082
-    ## 13       240   1.289699
-    ## 14       227   1.219840
-    ## 15       233   1.252082
-    ## 16       234   1.257456
-    ## 17       240   1.289699
-    ## 18       231   1.241335
-    ## 19       246   1.321941
-    ## 20       241   1.295072
-    ## 21       240   1.289699
-    ## 22       255   1.370305
-    ## 23       213   1.144607
-    ## 24       260   1.397173
-    ## 25       245   1.316567
-    ## 26       242   1.300446
-    ## 27       206   1.106991
-    ## 28       221   1.187597
-    ## 29       253   1.359557
-    ## 30       215   1.155355
-    ## 31       224   1.203719
-    ## 32       226   1.214466
-    ## 33       220   1.182224
-    ## 34       239   1.284325
-    ## 35       254   1.364931
-    ## 36       222   1.192971
-    ## 37       221   1.187597
-    ## 38       213   1.144607
-    ## 39       243   1.305820
-    ## 40       219   1.176850
-    ## 41       209   1.123112
-    ## 42       251   1.348810
-    ## 43       264   1.418668
-    ## 44       241   1.295072
-    ## 45       236   1.268204
-    ## 46       229   1.230587
-    ## 47       211   1.133860
-    ## 48       226   1.214466
-    ## 49       244   1.311194
-    ## 50       209   1.123112
-    ## 51       222   1.192971
-    ## 52       256   1.375678
-    ## 53       239   1.284325
-    ## 54       231   1.241335
-    ## 55       224   1.203719
-    ## 56       235   1.262830
-    ## 57       226   1.214466
-    ## 58       232   1.246709
-    ## 59       203   1.090870
-    ## 60       235   1.262830
-    ## 61       218   1.171476
-    ## 62       218   1.171476
-    ## 63       200   1.074749
-    ## 64       236   1.268204
-    ## 65       240   1.289699
-    ## 66       224   1.203719
-    ## 67       234   1.257456
-    ## 68       221   1.187597
-    ## 69       218   1.171476
-    ## 70       216   1.160729
-    ## 71       205   1.101617
-    ## 72       219   1.176850
-    ## 73       242   1.300446
-    ## 74       230   1.235961
-    ## 75       216   1.160729
-    ## 76       227   1.219840
-    ## 77       220   1.182224
-    ## 78       259   1.391800
-    ## 79       220   1.182224
-    ## 80       218   1.171476
-
-### Measures of central tendency
-
-``` r
-insurance_obs_mode <- names(table(insurance_obs$age))[
-  which(table(insurance_obs$age) == max(table(insurance_obs$age)))
-]
-print(insurance_obs_mode)
-```
-
-    ## [1] "10"
-
-### Measures of distribution
-
-#### Measure the variance of the age variable
-
-``` r
-var(insurance_obs[, 6])
-```
-
-    ## [1] 542.9001
-
-#### Measure the standard deviation of age variable
-
-``` r
-sd(insurance_obs[, 6] )
-```
-
-    ## [1] 23.30022
-
-#### Measure the kurtosis of each age variable
-
-``` r
-library(moments)
-
-kurtosis(insurance_obs[, 6], na.rm = TRUE)
-```
-
-    ## [1] 1.806842
-
-#### Measure the skewness of each variable
-
-``` r
-skewness(insurance_obs[, 6])
-```
-
-    ## [1] 0.02210227
-
-### Measures of relationship
-
-#### Measure the covariance between variables
-
-``` r
-insurance_obs_cov <- cov(insurance_obs[,c(2, 6)])
-View(insurance_obs_cov)
-```
-
-#### Measure the correlation between variables
-
-``` r
-insurance_obs_cor <- cor(insurance_obs[, c(2, 6)])
-View(insurance_obs_cor)
-```
-
-## Inferential statistics
-
-### Perform ANOVA
-
-#### One-Way ANOVA
-
-``` r
-insurance_obs_one_way_anova <- aov(age ~ rating, data = insurance_obs)
-summary(insurance_obs_one_way_anova)
-```
-
-    ##                Df   Sum Sq Mean Sq F value Pr(>F)  
-    ## rating          1     1729  1728.9   3.185 0.0743 .
-    ## Residuals   18607 10100555   542.8                 
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-#### Two-Way ANOVA
-
-``` r
-insurance_obs_additive_two_way_anova <- aov(age ~ rating + packagePrice, # nolint
-                                           data = insurance_obs)
-summary(insurance_obs_additive_two_way_anova)
-```
-
-    ##                 Df   Sum Sq Mean Sq F value Pr(>F)  
-    ## rating           1     1729  1728.9   3.185 0.0743 .
-    ## packagePrice     1     1062  1061.7   1.956 0.1620  
-    ## Residuals    18606 10099494   542.8                 
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-## Basic Visualization
-
-### Univariate plots
-
-#### create histograms
-
-``` r
-par(mar = c(4, 4, 2, 2)) 
-
-insurance_obs_yield <- as.numeric(unlist(insurance_obs[, 6]))
-hist(insurance_obs_yield, main = names(insurance_obs)[6])
-```
-
-![](Project_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
-
-#### Create Box and Whisker Plots for Each Numeric Attribute
-
-``` r
-boxplot(insurance_obs[, 6], main = names(insurance_obs)[6])
-```
-
-![](Project_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
-
-``` r
-boxplot(insurance_obs[, 2], main = names(insurance_obs)[2])
-```
-
-![](Project_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
-
-``` r
-boxplot(insurance_obs[, 8], main = names(insurance_obs)[8])
-```
-
-![](Project_files/figure-gfm/unnamed-chunk-21-3.png)<!-- -->
-
-#### Create Bar Plots for Each Categorical Attribute
-
-``` r
-barplot(table(insurance_obs[, 3]), main = names(insurance_obs)[3])
-```
-
-![](Project_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
-
-### Multivariate Plots
-
-#### Create a Correlation Plot
-
-``` r
-library(corrplot)
-```
-
-    ## corrplot 0.92 loaded
-
-``` r
-corrplot(cor(insurance_obs[, c(2, 6)]), method = "circle")
-```
-
-![](Project_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
-
-## Qualitative Data Analysis
-
-### Customize the Visualizations, Tables, and Colour Scheme
-
-#### blue-grey colour scheme for the visualizations
-
-``` r
-blue_grey_colours_11 <- c("#27408E", "#304FAF", "#536CB5", "#6981c7", "#8da0db", "#dde5ec", "#c8c9ca", "#B9BCC2", "#A7AAAF", "#888A8E", "#636569")
-
-blue_grey_colours_6 <- c("#27408E", "#304FAF", "#536CB5", "#B9BCC2", "#A7AAAF", "#888A8E")
-
-blue_grey_colours_4 <- c("#27408E", "#536CB5", "#B9BCC2", "#888A8E")
-
-blue_grey_colours_2 <- c("#27408E", "#888A8E")
-
-blue_grey_colours_1 <- c("#6981c7")
-```
-
-#### Custom theme for visualizations
-
-``` r
-blue_grey_theme <- function() {
-  theme(
-    axis.ticks = element_line(
-                              linewidth = 1, linetype = "dashed",
-                              lineend = NULL, color = "#dfdede",
-                              arrow = NULL, inherit.blank = FALSE),
-    axis.text = element_text(
-                             face = "bold", color = "#3f3f41",
-                             size = 12, hjust = 0.5),
-    axis.title = element_text(face = "bold", color = "#3f3f41",
-                              size = 14, hjust = 0.5),
-    plot.title = element_text(face = "bold", color = "#3f3f41",
-                              size = 16, hjust = 0.5),
-    panel.grid = element_line(
-                              linewidth = 0.1, linetype = "dashed",
-                              lineend = NULL, color = "#dfdede",
-                              arrow = NULL, inherit.blank = FALSE),
-    panel.background = element_rect(fill = "#f3eeee"),
-    legend.title = element_text(face = "plain", color = "#3f3f41",
-                                size = 12, hjust = 0),
-    legend.position = "right"
-  )
-}
-```
-
-#### Customize the text tables for consistency using HTML formatting
-
-``` r
-kable_theme <- function(dat, caption) {
-  kable(dat, "html", escape = FALSE, caption = caption) %>%
-    kable_styling(bootstrap_options = c("striped", "condensed", "bordered"),
-                  full_width = FALSE)
-}
-```
-
-### Contractions
-
-#### removal of special characters and conversion of lowercase
-
-``` r
-remove_special_characters <- function(doc) {
-  gsub("[^a-zA-Z0-9 ]", "", doc, ignore.case = TRUE)
-}
-
-
-insurance_obs$preIllness <- sapply(insurance_obs$preIllness, tolower) # nolint
-insurance_obs$services <- sapply(insurance_obs$services, tolower) # nolint
-insurance_obs$packageType <- sapply(insurance_obs$packageType, tolower) # nolint
-insurance_obs$priceRage <- sapply(insurance_obs$priceRage, tolower) # nolint
-View(insurance_obs)
-```
-
-# Pre-prosessing and Data Transformation
 
 # Training the Model
 
