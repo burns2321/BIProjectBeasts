@@ -43,80 +43,92 @@ insurance <- read.csv("data/insurance_info.csv")
 
 # Exploratory Data Analysis
 
-### Dimensions
+## Dimensions
 
 ```{r}
-# display the dimensions of your datasets
 dim(insurance)
-#Identify the Data Types
+```
+
+## Data Types
+
+```{r}
 sapply(insurance, class)
 ```
 
 ## Descriptive Statistics
 
-### Measures of frequency
+### Measures of Frequency
 
 ```{r}
-insurance_freq <- insurance$age
-cbind(frequency = table(insurance_freq),
-      percentage = prop.table(table(insurance_freq)) * 100)
+insurance_rating_freq <- insurance$rating
+cbind(frequency = table(insurance_rating_freq),
+      percentage = prop.table(table(insurance_rating_freq)) * 100)
 ```
 
-### Measures of central tendency
+### Measures of Central Tendency
 
 ```{r}
-insurance_mode <- names(table(insurance$age))[
-  which(table(insurance$age) == max(table(insurance$age)))
+insurance_rating_mode <- names(table(insurance$rating))[
+  which(table(insurance$rating) == max(table(insurance$rating)))
 ]
-print(insurance_mode)
+print(insurance_rating_mode)
 ```
 
-### Measures of distribution
+## Measures of Distribution/Dispersion/Spread/Scatter/Variability
 
-#### Measure the variance of the age variable
+### Measure the distribution of the data for each variable
 
 ```{r}
-var(insurance[, 6])
+summary(insurance)
+```
+
+### Measure the standard deviation of each variable
+
+```{r}
+library(e1071)
+
+sapply(insurance[, c(6,8)], sd)
+```
+
+### Measure the variance of each variable
+
+```{r}
+sapply(insurance[, c(6,8)], var)
+```
+
+### Measure the kurtosis of each variable
+
+```{r}
+library(e1071)
+
+sapply(insurance[, c(6, 8)], kurtosis, type = 2)
 
 ```
 
-#### Measure the standard deviation of age variable
+### Measure the skewness of each variable
 
 ```{r}
-sd(insurance[, 6] )
+sapply(insurance[, c(6, 8)],  skewness, type = 2)
 ```
 
-#### Measure the kurtosis of each age variable
+## Measures of Relationship
+
+### Measure the covariance between variables
 
 ```{r}
-library(moments)
-
-kurtosis(insurance[, 6], na.rm = TRUE)
-```
-
-#### Measure the skewness of each variable
-
-```{r}
-skewness(insurance[, 6])
-```
-
-### Measures of relationship
-
-#### Measure the covariance between variables
-
-```{r}
-insurance_cov <- cov(insurance[,c(8, 6)])
+insurance_cov <- cov(insurance[, c(6, 8)])
 View(insurance_cov)
+
 ```
 
-#### Measure the correlation between variables
+### Measure the correlation between variables
 
 ```{r}
-insurance_cor <- cor(insurance[, c(8, 6)])
+insurance_cor <- cor(insurance[, c(6, 8)])
 View(insurance_cor)
 ```
 
-## Inferential statistics
+## Inferential Statistics
 
 ### Perform ANOVA
 
@@ -130,71 +142,50 @@ summary(insurance_one_way_anova)
 #### Two-Way ANOVA
 
 ```{r}
-insurance_additive_two_way_anova <- aov(age ~ rating + packagePrice, # nolint
+insurance_two_way_anova <- aov(packagePrice ~ rating + age, # nolint
                                            data = insurance)
-summary(insurance_additive_two_way_anova)
+summary(insurance_two_way_anova)
 ```
 
-## Basic Visualization
+## Qualitative Data Analysis
 
 ### Univariate plots
 
-#### create histograms
+#### Create histograms
 
 ```{r}
-par(mar = c(4, 4, 2, 2)) 
-
-insurance_yield <- as.numeric(unlist(insurance[, 6]))
-hist(insurance_yield, main = names(insurance)[6])
+insurance_age <- as.numeric(unlist(insurance[, 6]))
+hist(insurance_age, main = names(insurance)[6])
 
 ```
 
 #### Create Box and Whisker Plots for Each Numeric Attribute
 
 ```{r}
+par(mar = c(3, 3, 1, 1))
+
 boxplot(insurance[, 6], main = names(insurance)[6])
 boxplot(insurance[, 2], main = names(insurance)[2])
 boxplot(insurance[, 8], main = names(insurance)[8])
 ```
 
-#### Create Bar Plots for Each Categorical Attribute
+#### Create a Missingness Map to Identify Missing Data
 
 ```{r}
-barplot(table(insurance[, 3]), main = names(insurance)[3])
+library(Amelia)
+
+missmap(insurance, col = c("red", "grey"), legend = TRUE)
 ```
 
-### Multivariate Plots
-
-#### Create a Correlation Plot
-
+### Multivariate Plots 
+#### Create a Correlation Plot 
 ```{r}
 library(corrplot)
 
-corrplot(cor(insurance[, c(2, 6)]), method = "circle")
+corrplot(cor(insurance[, c(6, 8)]), method = "circle")
 ```
 
-## Qualitative Data Analysis
-
-## Contractions
-
-### removal of special characters and conversion of lowercase
-
-```{r}
-remove_special_characters <- function(doc) {
-  gsub("[^a-zA-Z0-9 ]", "", doc, ignore.case = TRUE)
-}
-
-
-insurance$preIllness <- sapply(insurance$preIllness, tolower) # nolint
-insurance$services <- sapply(insurance$services, tolower) # nolint
-insurance$packageType <- sapply(insurance$packageType, tolower) # nolint
-insurance$priceRage <- sapply(insurance$priceRage, tolower) # nolint
-View(insurance)
-```
-
-# Pre-prosessing and Data Transformation
-## Handle missing values ----
-
+# Data Imputation
 ### Are there missing values in the dataset?
 
 ```{r}
@@ -202,7 +193,6 @@ library(tidyverse)
 
 anyNA(insurance)
 ```
-
 ### How many?
 
 ```{r}
@@ -240,14 +230,6 @@ miss_case_summary(insurance)
 gg_miss_var(insurance)
 ```
 
-### Where are missing values located (the shaded regions in the plot)?
-```{r}
-library(naniar)
-library(ggplot2)
-
-vis_miss(insurance) + theme(axis.text.x = element_text(angle = 80))
-```
-
 ## Remove the observations with missing values
 
 ```{r}
@@ -255,15 +237,224 @@ insurance_obs <- insurance %>% filter(complete.cases(.))
 dim(insurance_obs)
 ```
 
-#### Are there missing values in the dataset?
 
+# Data transformation
+### The Scale Basic Transform
+#### Before
 ```{r}
-any_na(insurance_obs)
+library(caret)
+
+summary(insurance_obs)
+insurance_obs_yield <- as.numeric(unlist(insurance_obs[, 8]))
+hist(insurance_obs_yield, main = names(insurance_obs)[8])
+
+model_of_the_transform <- preProcess(insurance_obs, method = c("scale"))
+print(model_of_the_transform)
+insurance_scale_transform <- predict(model_of_the_transform, insurance_obs)
+```
+
+#### After
+```{r}
+summary(insurance_scale_transform)
+insurance_obs_yield <- as.numeric(unlist(insurance_scale_transform[, 8]))
+hist(insurance_obs_yield, main = names(insurance_scale_transform)[8])
 ```
 
 
-# Training the Model
+### Center Data Transform
 
-# Hyper-parameter Tuning and Ensembles
+```{r}
+summary(insurance_obs)
+model_of_the_transform <- preProcess(insurance_obs, method = c("center"))
+print(model_of_the_transform)
+insurance_center_transform <- predict(model_of_the_transform, insurance_obs)
+summary(insurance_center_transform)
+```
 
-# Consolidation
+### Standardize Data Transform
+#### Before
+
+```{r}
+summary(insurance_obs)
+sapply(insurance_obs[, c(6,8)], sd)
+model_of_the_transform <- preProcess(insurance_obs,
+                                     method = c("scale", "center"))
+print(model_of_the_transform)
+insurance_standardize_transform <- predict(model_of_the_transform, insurance_obs) # nolint
+
+```
+
+#### After
+
+```{r}
+summary(insurance_standardize_transform)
+sapply(insurance_standardize_transform[, c(6,8)], sd)
+```
+
+### Normalize Data Transform
+
+```{r}
+summary(insurance_obs)
+model_of_the_transform <- preProcess(insurance_obs, method = c("range"))
+print(model_of_the_transform)
+insurance_normalize_transform <- predict(model_of_the_transform, insurance_obs)
+summary(insurance_normalize_transform)
+```
+
+### Box-Cox Power Transform 
+#### Before
+
+```{r}
+library(e1071)
+
+summary(insurance_standardize_transform)
+
+# Calculate the skewness before the Box-Cox transform
+sapply(insurance_standardize_transform[, c(6,8)],  skewness, type = 2)
+sapply(insurance_standardize_transform[, c(6,8)], sd)
+
+model_of_the_transform <- preProcess(insurance_standardize_transform,
+                                     method = c("BoxCox"))
+print(model_of_the_transform)
+insurance_box_cox_transform <- predict(model_of_the_transform,
+                                       insurance_standardize_transform)
+```
+
+#### After
+
+```{r}
+summary(insurance_box_cox_transform)
+
+sapply(insurance_box_cox_transform[, c(6,8)],  skewness, type = 2)
+sapply(insurance_box_cox_transform[, c(6,8)], sd)
+
+# Calculate the skewness after the Box-Cox transform
+sapply(insurance_box_cox_transform[, c(6,8)],  skewness, type = 2)
+sapply(insurance_box_cox_transform[, c(6,8)], sd)
+```
+### Yeo-Johnson Power Transform 
+#### Before
+```{r}
+summary(insurance_standardize_transform)
+
+# Calculate the skewness before the Yeo-Johnson transform
+sapply(insurance_standardize_transform[, c(6,8)],  skewness, type = 2)
+sapply(insurance_standardize_transform[, c(6,8)], sd)
+
+model_of_the_transform <- preProcess(insurance_standardize_transform,
+                                     method = c("YeoJohnson"))
+print(model_of_the_transform)
+insurance_yeo_johnson_transform <- predict(model_of_the_transform, # nolint
+                                           insurance_standardize_transform)
+
+```
+#### After
+```{r}
+summary(insurance_yeo_johnson_transform)
+
+# Calculate the skewness after the Yeo-Johnson transform
+sapply(insurance_yeo_johnson_transform[, c(6,8)],  skewness, type = 2)
+sapply(insurance_yeo_johnson_transform[, c(6,8)], sd)
+
+```
+
+### PCA for Dimensionality Reduction
+```{r}
+summary(insurance)
+
+model_of_the_transform <- preProcess(insurance, method =
+                                       c("scale", "center", "pca"))
+
+print(model_of_the_transform)
+insurance_pca_dr <- predict(model_of_the_transform, insurance)
+
+summary(insurance_pca_dr)
+```
+### PCA for Feature Extraction
+```{r}
+insurance_pca_fe <- princomp(cor(insurance[, c(6,8)]))
+summary(insurance_pca_fe)
+```
+
+#### Scree Plot 
+```{r}
+factoextra::fviz_eig(insurance_pca_fe, addlabels = TRUE)
+```
+
+#### Loading Values
+```{r}
+insurance_pca_fe$rating[, 1:2]
+factoextra::fviz_cos2(insurance_pca_fe, choice = "var", axes = 1:2)
+```
+
+#### Biplot and Cos2 Combined Plot
+```{r}
+factoextra::fviz_pca_var(insurance_pca_fe, col.var = "cos2",
+                         gradient.cols = c("red", "orange", "green"),
+                         repel = TRUE)
+```
+
+### ICA for Dimensionality Reduction on the Boston Housing Dataset
+```{r}
+summary(insurance)
+
+model_of_the_transform <- preProcess(insurance,
+                                     method = c("scale", "center", "ica"),
+                                     n.comp = 3)
+print(model_of_the_transform)
+insurance_ica_dr <- predict(model_of_the_transform, insurance)
+
+summary(insurance_ica_dr)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

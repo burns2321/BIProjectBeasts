@@ -1,12 +1,4 @@
 
-
-#install.packages("moments")
-
-if (!is.element("e1071", installed.packages()[, 1])) {
-  install.packages("e1071", dependencies = TRUE)
-}
-require("e1071")
-
 ## arules ----
 if (require("arules")) {
   require("arules")
@@ -72,14 +64,6 @@ if (require("dplyr")) {
                    repos = "https://cloud.r-project.org")
 }
 
-## naniar ----
-if (require("naniar")) {
-  require("naniar")
-} else {
-  install.packages("naniar", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
 ## RColorBrewer ----
 if (require("RColorBrewer")) {
   require("RColorBrewer")
@@ -93,22 +77,6 @@ if (require("stats")) {
   require("stats")
 } else {
   install.packages("stats", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## mlbench ----
-if (require("mlbench")) {
-  require("mlbench")
-} else {
-  install.packages("mlbench", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## caret ----
-if (require("caret")) {
-  require("caret")
-} else {
-  install.packages("caret", dependencies = TRUE,
                    repos = "https://cloud.r-project.org")
 }
 
@@ -128,13 +96,6 @@ if (require("glmnet")) {
                    repos = "https://cloud.r-project.org")
 }
 
-## e1071 ----
-if (require("e1071")) {
-  require("e1071")
-} else {
-  install.packages("e1071", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
 
 ## kernlab ----
 if (require("kernlab")) {
@@ -152,7 +113,6 @@ if (require("rpart")) {
                    repos = "https://cloud.r-project.org")
 }
 
-
 ## NHANES ----
 if (!is.element("NHANES", installed.packages()[, 1])) {
   install.packages("NHANES", dependencies = TRUE,
@@ -161,22 +121,11 @@ if (!is.element("NHANES", installed.packages()[, 1])) {
 require("NHANES")
 
 ## naniar ----
-# Documentation:
-#   https://cran.r-project.org/package=naniar or
-#   https://www.rdocumentation.org/packages/naniar/versions/1.0.0
 if (!is.element("naniar", installed.packages()[, 1])) {
   install.packages("naniar", dependencies = TRUE,
                    repos = "https://cloud.r-project.org")
 }
 require("naniar")
-
-## ggplot2 ----
-# We require the "ggplot2" package to create more appealing visualizations
-if (!is.element("ggplot2", installed.packages()[, 1])) {
-  install.packages("ggplot2", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-require("ggplot2")
 
 ## MICE ----
 # We use the MICE package to perform data imputation
@@ -240,5 +189,25 @@ if (require("FactoMineR")) {
   install.packages("FactoMineR", dependencies = TRUE,
                    repos = "https://cloud.r-project.org")
 }
+
+## corrplot ----
+if (!is.element("corrplot", installed.packages()[, 1])) {
+  install.packages("corrplot", dependencies = TRUE)
+}
+require("corrplot")
+
+## ggcorrplot ----
+if (!is.element("ggcorrplot", installed.packages()[, 1])) {
+  install.packages("ggcorrplot", dependencies = TRUE)
+}
+require("ggcorrplot")
+
+## ggplot2 ----
+# We require the "ggplot2" package to create more appealing visualizations
+if (!is.element("ggplot2", installed.packages()[, 1])) {
+  install.packages("ggplot2", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+require("ggplot2")
 
 renv::snapshot()
