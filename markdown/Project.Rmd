@@ -385,7 +385,7 @@ insurance_ica_dr <- predict(model_of_the_transform, insurance)
 summary(insurance_ica_dr)
 ```
 
-# Resampling methods
+# Train Model
 ## Split the dataset
 ```{r}
 train_index <- createDataPartition(insurance_obs$rating,
@@ -551,9 +551,6 @@ plot(rules_to_plot_by_lift, method = "paracoord")
 
 plot(top_10_rules_to_plot, method = "grouped")
 ```
-
-
-
 
 
 

@@ -78,7 +78,7 @@ Business Intelligence Project
     Reduction](#pca-for-dimensionality-reduction)
   - [ICA for Dimensionality Reduction on the Boston Housing
     Dataset](#ica-for-dimensionality-reduction-on-the-boston-housing-dataset)
-- [Resampling methods](#resampling-methods)
+- [Train Model](#train-model)
   - [Split the dataset](#split-the-dataset)
   - [Single Format](#single-format)
   - [Basket Format](#basket-format)
@@ -1201,23 +1201,23 @@ summary(insurance_ica_dr)
     ##                                                                             
     ##                                                                             
     ##   preIllness        transactionNo           ICA1              ICA2        
-    ##  Length:19999       Length:19999       Min.   :-1.7472   Min.   :-1.7508  
-    ##  Class :character   Class :character   1st Qu.:-0.8628   1st Qu.:-0.8572  
-    ##  Mode  :character   Mode  :character   Median : 0.0002   Median :-0.0032  
+    ##  Length:19999       Length:19999       Min.   :-1.7509   Min.   :-1.7349  
+    ##  Class :character   Class :character   1st Qu.:-0.8572   1st Qu.:-0.8618  
+    ##  Mode  :character   Mode  :character   Median :-0.0032   Median :-0.0014  
     ##                                        Mean   : 0.0000   Mean   : 0.0000  
-    ##                                        3rd Qu.: 0.8580   3rd Qu.: 0.8533  
-    ##                                        Max.   : 1.7252   Max.   : 1.7492  
+    ##                                        3rd Qu.: 0.8533   3rd Qu.: 0.8628  
+    ##                                        Max.   : 1.7492   Max.   : 1.7352  
     ##                                        NA's   :1390      NA's   :1390     
     ##       ICA3        
-    ##  Min.   :-1.7349  
-    ##  1st Qu.:-0.8618  
-    ##  Median :-0.0014  
+    ##  Min.   :-1.7252  
+    ##  1st Qu.:-0.8580  
+    ##  Median :-0.0002  
     ##  Mean   : 0.0000  
     ##  3rd Qu.: 0.8628  
-    ##  Max.   : 1.7352  
+    ##  Max.   : 1.7471  
     ##  NA's   :1390
 
-# Resampling methods
+# Train Model
 
 ## Split the dataset
 
