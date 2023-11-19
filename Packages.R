@@ -210,4 +210,12 @@ if (!is.element("ggplot2", installed.packages()[, 1])) {
 }
 require("ggplot2")
 
+## LiblineaR ----
+if (require("LiblineaR")) {
+  require("LiblineaR")
+} else {
+  install.packages("LiblineaR", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
 renv::snapshot()

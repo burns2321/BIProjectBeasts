@@ -162,7 +162,7 @@ hist(insurance_age, main = names(insurance)[6])
 #### Create Box and Whisker Plots for Each Numeric Attribute
 
 ```{r}
-par(mar = c(3, 3, 1, 1))
+par(mar = c(1, 1, 1, 1))
 
 boxplot(insurance[, 6], main = names(insurance)[6])
 boxplot(insurance[, 2], main = names(insurance)[2])
@@ -186,6 +186,7 @@ corrplot(cor(insurance[, c(6, 8)]), method = "circle")
 ```
 
 # Data Imputation
+## Handle missing values
 ### Are there missing values in the dataset?
 
 ```{r}
@@ -239,8 +240,8 @@ dim(insurance_obs)
 
 
 # Data transformation
-### The Scale Basic Transform
-#### Before
+## The Scale Basic Transform
+### Before
 ```{r}
 library(caret)
 
@@ -253,7 +254,7 @@ print(model_of_the_transform)
 insurance_scale_transform <- predict(model_of_the_transform, insurance_obs)
 ```
 
-#### After
+### After
 ```{r}
 summary(insurance_scale_transform)
 insurance_obs_yield <- as.numeric(unlist(insurance_scale_transform[, 8]))
@@ -261,7 +262,7 @@ hist(insurance_obs_yield, main = names(insurance_scale_transform)[8])
 ```
 
 
-### Center Data Transform
+## Center Data Transform
 
 ```{r}
 summary(insurance_obs)
@@ -271,8 +272,8 @@ insurance_center_transform <- predict(model_of_the_transform, insurance_obs)
 summary(insurance_center_transform)
 ```
 
-### Standardize Data Transform
-#### Before
+## Standardize Data Transform
+### Before
 
 ```{r}
 summary(insurance_obs)
@@ -284,14 +285,14 @@ insurance_standardize_transform <- predict(model_of_the_transform, insurance_obs
 
 ```
 
-#### After
+### After
 
 ```{r}
 summary(insurance_standardize_transform)
 sapply(insurance_standardize_transform[, c(6,8)], sd)
 ```
 
-### Normalize Data Transform
+## Normalize Data Transform
 
 ```{r}
 summary(insurance_obs)
@@ -301,8 +302,8 @@ insurance_normalize_transform <- predict(model_of_the_transform, insurance_obs)
 summary(insurance_normalize_transform)
 ```
 
-### Box-Cox Power Transform 
-#### Before
+## Box-Cox Power Transform 
+### Before
 
 ```{r}
 library(e1071)
@@ -320,7 +321,7 @@ insurance_box_cox_transform <- predict(model_of_the_transform,
                                        insurance_standardize_transform)
 ```
 
-#### After
+### After
 
 ```{r}
 summary(insurance_box_cox_transform)
@@ -332,8 +333,8 @@ sapply(insurance_box_cox_transform[, c(6,8)], sd)
 sapply(insurance_box_cox_transform[, c(6,8)],  skewness, type = 2)
 sapply(insurance_box_cox_transform[, c(6,8)], sd)
 ```
-### Yeo-Johnson Power Transform 
-#### Before
+## Yeo-Johnson Power Transform 
+### Before
 ```{r}
 summary(insurance_standardize_transform)
 
@@ -348,7 +349,7 @@ insurance_yeo_johnson_transform <- predict(model_of_the_transform, # nolint
                                            insurance_standardize_transform)
 
 ```
-#### After
+### After
 ```{r}
 summary(insurance_yeo_johnson_transform)
 
@@ -358,7 +359,7 @@ sapply(insurance_yeo_johnson_transform[, c(6,8)], sd)
 
 ```
 
-### PCA for Dimensionality Reduction
+## PCA for Dimensionality Reduction
 ```{r}
 summary(insurance)
 
@@ -370,31 +371,31 @@ insurance_pca_dr <- predict(model_of_the_transform, insurance)
 
 summary(insurance_pca_dr)
 ```
-### PCA for Feature Extraction
+## PCA for Feature Extraction
 ```{r}
 insurance_pca_fe <- princomp(cor(insurance[, c(6,8)]))
 summary(insurance_pca_fe)
 ```
 
-#### Scree Plot 
+### Scree Plot 
 ```{r}
 factoextra::fviz_eig(insurance_pca_fe, addlabels = TRUE)
 ```
 
-#### Loading Values
+### Loading Values
 ```{r}
 insurance_pca_fe$rating[, 1:2]
-factoextra::fviz_cos2(insurance_pca_fe, choice = "var", axes = 1:2)
+factoextra::fviz_cos2(insurance_pca_fe, choice = "var", axes = 1:1)
 ```
 
-#### Biplot and Cos2 Combined Plot
+### Biplot and Cos2 Combined Plot
 ```{r}
 factoextra::fviz_pca_var(insurance_pca_fe, col.var = "cos2",
                          gradient.cols = c("red", "orange", "green"),
                          repel = TRUE)
 ```
 
-### ICA for Dimensionality Reduction on the Boston Housing Dataset
+## ICA for Dimensionality Reduction on the Boston Housing Dataset
 ```{r}
 summary(insurance)
 
@@ -407,10 +408,33 @@ insurance_ica_dr <- predict(model_of_the_transform, insurance)
 summary(insurance_ica_dr)
 ```
 
+# Resampling methods
+## Split the dataset
+```{r}
+train_index <- createDataPartition(insurance$rating,
+                                   p = 0.75,
+                                   list = FALSE)
+insurance_train <- insurance[train_index, ]
+insurance_test <- insurance[-train_index, ]
+```
+## Train a Naive Bayes classifier using the training dataset
+```{r}
+insurance_model_nb <-
+  e1071::naiveBayes(rating ~ .,
+                    data = insurance_train)
+```
 
+## Test the trained model using the testing dataset 
+```{r}
+predictions_nb_e1071 <-
+  predict(insurance_model_nb,
+          insurance_test[, c("insurance.name","packagePrice", "services", "priceRage","packageType","age", "preIllness", "rating", "transactionNo")])
+```
 
+## View results
+```{r}
 
-
+```
 
 
 
