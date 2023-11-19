@@ -361,9 +361,9 @@ sapply(insurance_yeo_johnson_transform[, c(6,8)], sd)
 
 ## PCA for Dimensionality Reduction
 ```{r}
-summary(insurance)
+summary(insurance_obs)
 
-model_of_the_transform <- preProcess(insurance, method =
+model_of_the_transform <- preProcess(insurance_obs, method =
                                        c("scale", "center", "pca"))
 
 print(model_of_the_transform)
@@ -371,35 +371,12 @@ insurance_pca_dr <- predict(model_of_the_transform, insurance)
 
 summary(insurance_pca_dr)
 ```
-## PCA for Feature Extraction
-```{r}
-insurance_pca_fe <- princomp(cor(insurance[, c(6,8)]))
-summary(insurance_pca_fe)
-```
-
-### Scree Plot 
-```{r}
-factoextra::fviz_eig(insurance_pca_fe, addlabels = TRUE)
-```
-
-### Loading Values
-```{r}
-insurance_pca_fe$rating[, 1:2]
-factoextra::fviz_cos2(insurance_pca_fe, choice = "var", axes = 1:1)
-```
-
-### Biplot and Cos2 Combined Plot
-```{r}
-factoextra::fviz_pca_var(insurance_pca_fe, col.var = "cos2",
-                         gradient.cols = c("red", "orange", "green"),
-                         repel = TRUE)
-```
 
 ## ICA for Dimensionality Reduction on the Boston Housing Dataset
 ```{r}
-summary(insurance)
+summary(insurance_obs)
 
-model_of_the_transform <- preProcess(insurance,
+model_of_the_transform <- preProcess(insurance_obs,
                                      method = c("scale", "center", "ica"),
                                      n.comp = 3)
 print(model_of_the_transform)
@@ -411,43 +388,169 @@ summary(insurance_ica_dr)
 # Resampling methods
 ## Split the dataset
 ```{r}
-train_index <- createDataPartition(insurance$rating,
+train_index <- createDataPartition(insurance_obs$rating,
                                    p = 0.75,
                                    list = FALSE)
-insurance_train <- insurance[train_index, ]
-insurance_test <- insurance[-train_index, ]
+insurance_obs_train <- insurance_obs[train_index, ]
+insurance_obs_test <- insurance_obs[-train_index, ]
 ```
-## Train a Naive Bayes classifier using the training dataset
+
+## Single Format 
 ```{r}
-insurance_model_nb <-
-  e1071::naiveBayes(rating ~ .,
-                    data = insurance_train)
-```
+library(arules)
 
-## Test the trained model using the testing dataset 
+transactions_single_format <-
+  read.transactions("data/transactions_single_format.csv",
+                    format = "single", cols = c(1, 2))
+
+inspect(head(transactions_single_format))
+print(transactions_single_format)
+```
+##  Basket Format
+
 ```{r}
-predictions_nb_e1071 <-
-  predict(insurance_model_nb,
-          insurance_test[, c("insurance.name","packagePrice", "services", "priceRage","packageType","age", "preIllness", "rating", "transactionNo")])
+library(arules)
+
+transactions_basket_format_listings <-
+  read.transactions("data/transactions_basket_format.csv",
+                    format = "basket", sep = ",", cols = 2)
+summary(transactions_basket_format_listings)  # Summary of the transactions
+inspect(transactions_basket_format_listings)  # View the transactions
 ```
 
-## View results
+## Create a transaction data using the "basket format"
+
 ```{r}
+transaction_data_insurance <-
+  plyr::ddply(insurance_obs,
+    c("insurance.name","services", "priceRage", "age", "preIllness"),
+    function(df1) paste(df1$rating, collapse = ","))
+
+View(transaction_data_insurance)
 
 ```
 
+### Record only the `items` variable
 
+```{r}
+library(dplyr)
 
+transaction_data_insurance <-
+  transaction_data_insurance %>%
+  dplyr::select("items" = V1)%>% 
+  mutate(items = paste("{", items, "}", sep = ""))
 
+View(transaction_data_insurance)
+```
 
+## Save the transactions in CSV format
 
+```{r}
+write.csv(transaction_data_insurance,
+          "data/transactions_basket_format_insurance.csv",
+          quote = FALSE, row.names = FALSE)
+```
 
+## Read the transactions from the CSV file
 
+```{r}
+tr_insurance <-
+  read.transactions("data/transactions_basket_format_insurance.csv",
+    format = "basket",
+    header = TRUE,
+    rm.duplicates = TRUE,
+    sep = ","
+  )
 
+print(tr_insurance)
+summary(tr_insurance)
+```
 
+## Basic EDA
 
+```{r}
+library(RColorBrewer)
 
+itemFrequencyPlot(tr_insurance, topN = 10, type = "absolute",
+                  col = brewer.pal(8, "Pastel2"),
+                  main = "Absolute Item Frequency Plot",
+                  horiz = TRUE,
+                  mai = c(1, 1, 1, 0.9))
+itemFrequencyPlot(tr_insurance, topN = 10, type = "relative",
+                  col = brewer.pal(8, "Pastel2"),
+                  main = "Relative Item Frequency Plot",
+                  horiz = TRUE,
+                  mai = c(1, 1, 1, 0.9))
+```
 
+## Create the association rules
+
+```{r}
+library(arulesViz)
+association_rules_insurance <- apriori(tr_insurance,
+                             parameter = list(support = 0.01,
+                                              confidence = 0.05,
+                                              maxlen = 10)) 
+
+#Print the association rules to view the top 10 rules
+summary(association_rules_insurance)
+inspect(association_rules_insurance)
+# To view the top 10 rules
+inspect(association_rules_insurance[1:10])
+plot(association_rules_insurance)
+
+```
+### Remove redundant rules 
+```{r}
+subset_rules <-
+  which(colSums(is.subset(association_rules_insurance,
+                          association_rules_insurance)) > 1)
+length(subset_rules)
+association_rules_no_reps <- association_rules_insurance[-subset_rules]
+
+summary(association_rules_no_reps)
+inspect(association_rules_no_reps)
+
+write(association_rules_no_reps,
+      file = "rules/association_rules_based_on_rating_code.csv")
+```
+
+## Find specific rules
+
+```{r}
+rating_association_rules <- # nolint
+  apriori(tr_insurance, parameter = list(supp = 0.01, conf = 0.05),
+          appearance = list(default = "rhs",
+                            rhs = "2"))
+inspect(head(rating_association_rules))
+```
+
+## Visualize the rules
+### Filter rules with confidence greater than 0.85 or 85%
+```{r}
+rules_to_plot <-
+  association_rules_insurance[quality(association_rules_insurance)$confidence > 0.08] # nolint
+#Plot SubRules
+plot(rules_to_plot)
+plot(rules_to_plot, method = "two-key plot")
+```
+
+```{r}
+top_10_rules_to_plot <- head(rules_to_plot, n = 10, by = "confidence")
+plot(top_10_rules_to_plot, method = "graph",  engine = "htmlwidget")
+
+#saveAsGraph(head(rules_to_plot, n = 1000, by = "lift"),
+           # file = #"graph/association_rules_prod_no_reps.graphml")
+
+```
+
+### Filter top 20 rules with highest lift
+```{r}
+rules_to_plot_by_lift <- head(rules_to_plot, n = 20, by = "lift")
+plot(rules_to_plot_by_lift, method = "paracoord")
+
+plot(top_10_rules_to_plot, method = "grouped")
+```
 
 
 

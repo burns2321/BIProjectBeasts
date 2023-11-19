@@ -41,19 +41,22 @@ Business Intelligence Project
     - [Multivariate Plots](#multivariate-plots)
       - [Create a Correlation Plot](#create-a-correlation-plot)
 - [Data Imputation](#data-imputation)
-  - [Are there missing values in the
-    dataset?](#are-there-missing-values-in-the-dataset)
-  - [How many?](#how-many)
-  - [What is the proportion of missing data in the entire
-    dataset?](#what-is-the-proportion-of-missing-data-in-the-entire-dataset)
-  - [How many missing values does each variable
-    have?](#how-many-missing-values-does-each-variable-have)
-  - [What is the number and percentage of missing values grouped by each
-    variable?](#what-is-the-number-and-percentage-of-missing-values-grouped-by-each-variable)
-  - [What is the number and percentage of missing values grouped by each
-    observation?](#what-is-the-number-and-percentage-of-missing-values-grouped-by-each-observation)
-  - [Which variables contain the most missing
-    values?](#which-variables-contain-the-most-missing-values)
+  - [Handle missing values](#handle-missing-values)
+    - [Are there missing values in the
+      dataset?](#are-there-missing-values-in-the-dataset)
+    - [How many?](#how-many)
+    - [What is the proportion of missing data in the entire
+      dataset?](#what-is-the-proportion-of-missing-data-in-the-entire-dataset)
+    - [How many missing values does each variable
+      have?](#how-many-missing-values-does-each-variable-have)
+    - [What is the number and percentage of missing values grouped by
+      each
+      variable?](#what-is-the-number-and-percentage-of-missing-values-grouped-by-each-variable)
+    - [What is the number and percentage of missing values grouped by
+      each
+      observation?](#what-is-the-number-and-percentage-of-missing-values-grouped-by-each-observation)
+    - [Which variables contain the most missing
+      values?](#which-variables-contain-the-most-missing-values)
   - [Remove the observations with missing
     values](#remove-the-observations-with-missing-values)
 - [Data transformation](#data-transformation)
@@ -73,12 +76,28 @@ Business Intelligence Project
     - [After](#after-3)
   - [PCA for Dimensionality
     Reduction](#pca-for-dimensionality-reduction)
-  - [PCA for Feature Extraction](#pca-for-feature-extraction)
-    - [Scree Plot](#scree-plot)
-    - [Loading Values](#loading-values)
-    - [Biplot and Cos2 Combined Plot](#biplot-and-cos2-combined-plot)
   - [ICA for Dimensionality Reduction on the Boston Housing
     Dataset](#ica-for-dimensionality-reduction-on-the-boston-housing-dataset)
+- [Resampling methods](#resampling-methods)
+  - [Split the dataset](#split-the-dataset)
+  - [Single Format](#single-format)
+  - [Basket Format](#basket-format)
+  - [Create a transaction data using the “basket
+    format”](#create-a-transaction-data-using-the-basket-format)
+    - [Record only the `items`
+      variable](#record-only-the-items-variable)
+  - [Save the transactions in CSV
+    format](#save-the-transactions-in-csv-format)
+  - [Read the transactions from the CSV
+    file](#read-the-transactions-from-the-csv-file)
+  - [Basic EDA](#basic-eda)
+  - [Create the association rules](#create-the-association-rules)
+  - [Find specific rules](#find-specific-rules)
+  - [Visualize the rules](#visualize-the-rules)
+    - [Filter rules with confidence greater than 0.85 or
+      85%](#filter-rules-with-confidence-greater-than-085-or-85)
+    - [Filter top 20 rules with highest
+      lift](#filter-top-20-rules-with-highest-lift)
 
 # Student Details
 
@@ -326,7 +345,7 @@ hist(insurance_age, main = names(insurance)[6])
 #### Create Box and Whisker Plots for Each Numeric Attribute
 
 ``` r
-par(mar = c(3, 3, 1, 1))
+par(mar = c(1, 1, 1, 1))
 
 boxplot(insurance[, 6], main = names(insurance)[6])
 ```
@@ -383,6 +402,8 @@ corrplot(cor(insurance[, c(6, 8)]), method = "circle")
 ![](Project_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 # Data Imputation
+
+## Handle missing values
 
 ### Are there missing values in the dataset?
 
@@ -495,9 +516,9 @@ dim(insurance_obs)
 
 # Data transformation
 
-### The Scale Basic Transform
+## The Scale Basic Transform
 
-#### Before
+### Before
 
 ``` r
 library(caret)
@@ -560,7 +581,7 @@ print(model_of_the_transform)
 insurance_scale_transform <- predict(model_of_the_transform, insurance_obs)
 ```
 
-#### After
+### After
 
 ``` r
 summary(insurance_scale_transform)
@@ -595,7 +616,7 @@ hist(insurance_obs_yield, main = names(insurance_scale_transform)[8])
 
 ![](Project_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
 
-### Center Data Transform
+## Center Data Transform
 
 ``` r
 summary(insurance_obs)
@@ -661,9 +682,9 @@ summary(insurance_center_transform)
     ##                    
     ## 
 
-### Standardize Data Transform
+## Standardize Data Transform
 
-#### Before
+### Before
 
 ``` r
 summary(insurance_obs)
@@ -715,7 +736,7 @@ print(model_of_the_transform)
 insurance_standardize_transform <- predict(model_of_the_transform, insurance_obs) # nolint
 ```
 
-#### After
+### After
 
 ``` r
 summary(insurance_standardize_transform)
@@ -750,7 +771,7 @@ sapply(insurance_standardize_transform[, c(6,8)], sd)
     ##    age rating 
     ##      1      1
 
-### Normalize Data Transform
+## Normalize Data Transform
 
 ``` r
 summary(insurance_obs)
@@ -816,9 +837,9 @@ summary(insurance_normalize_transform)
     ##                    
     ## 
 
-### Box-Cox Power Transform
+## Box-Cox Power Transform
 
-#### Before
+### Before
 
 ``` r
 library(e1071)
@@ -879,7 +900,7 @@ insurance_box_cox_transform <- predict(model_of_the_transform,
                                        insurance_standardize_transform)
 ```
 
-#### After
+### After
 
 ``` r
 summary(insurance_box_cox_transform)
@@ -936,9 +957,9 @@ sapply(insurance_box_cox_transform[, c(6,8)], sd)
     ##    age rating 
     ##      1      1
 
-### Yeo-Johnson Power Transform
+## Yeo-Johnson Power Transform
 
-#### Before
+### Before
 
 ``` r
 summary(insurance_standardize_transform)
@@ -1001,7 +1022,7 @@ insurance_yeo_johnson_transform <- predict(model_of_the_transform, # nolint
                                            insurance_standardize_transform)
 ```
 
-#### After
+### After
 
 ``` r
 summary(insurance_yeo_johnson_transform)
@@ -1044,39 +1065,36 @@ sapply(insurance_yeo_johnson_transform[, c(6,8)], sd)
     ##       age    rating 
     ## 0.9999392 0.9999956
 
-### PCA for Dimensionality Reduction
+## PCA for Dimensionality Reduction
 
 ``` r
-summary(insurance)
+summary(insurance_obs)
 ```
 
     ##  insurance.name      packagePrice      services          priceRage        
-    ##  Length:19999       Min.   :  6001   Length:19999       Length:19999      
+    ##  Length:18609       Min.   :  6001   Length:18609       Length:18609      
     ##  Class :character   1st Qu.: 40045   Class :character   Class :character  
     ##  Mode  :character   Median : 73103   Mode  :character   Mode  :character  
     ##                     Mean   : 72979                                        
     ##                     3rd Qu.:106008                                        
     ##                     Max.   :140000                                        
-    ##                     NA's   :1390                                          
-    ##  packageType             age        preIllness            rating     
-    ##  Length:19999       Min.   : 0.0   Length:19999       Min.   :1.000  
-    ##  Class :character   1st Qu.:19.0   Class :character   1st Qu.:2.000  
-    ##  Mode  :character   Median :39.0   Mode  :character   Median :3.000  
-    ##                     Mean   :39.7                      Mean   :2.994  
-    ##                     3rd Qu.:60.0                      3rd Qu.:4.000  
-    ##                     Max.   :80.0                      Max.   :5.000  
-    ##                                                                      
+    ##  packageType             age         preIllness            rating 
+    ##  Length:18609       Min.   : 0.00   Length:18609       Min.   :1  
+    ##  Class :character   1st Qu.:20.00   Class :character   1st Qu.:2  
+    ##  Mode  :character   Median :40.00   Mode  :character   Median :3  
+    ##                     Mean   :39.73                      Mean   :3  
+    ##                     3rd Qu.:60.00                      3rd Qu.:4  
+    ##                     Max.   :80.00                      Max.   :5  
     ##  transactionNo     
-    ##  Length:19999      
+    ##  Length:18609      
     ##  Class :character  
     ##  Mode  :character  
-    ##                    
     ##                    
     ##                    
     ## 
 
 ``` r
-model_of_the_transform <- preProcess(insurance, method =
+model_of_the_transform <- preProcess(insurance_obs, method =
                                        c("scale", "center", "pca"))
 
 print(model_of_the_transform)
@@ -1107,100 +1125,52 @@ summary(insurance_pca_dr)
     ##                                                                             
     ##                                                                             
     ##   preIllness        transactionNo           PC1               PC2         
-    ##  Length:19999       Length:19999       Min.   :-2.8351   Min.   :-2.4581  
-    ##  Class :character   Class :character   1st Qu.:-0.7251   1st Qu.:-0.7312  
-    ##  Mode  :character   Mode  :character   Median : 0.0004   Median :-0.0052  
-    ##                                        Mean   : 0.0040   Mean   :-0.0034  
-    ##                                        3rd Qu.: 0.7262   3rd Qu.: 0.7218  
-    ##                                        Max.   : 2.8376   Max.   : 2.4555  
+    ##  Length:19999       Length:19999       Min.   :-2.8397   Min.   :-2.4541  
+    ##  Class :character   Class :character   1st Qu.:-0.7294   1st Qu.:-0.7274  
+    ##  Mode  :character   Mode  :character   Median :-0.0041   Median :-0.0020  
+    ##                                        Mean   : 0.0000   Mean   : 0.0000  
+    ##                                        3rd Qu.: 0.7230   3rd Qu.: 0.7252  
+    ##                                        Max.   : 2.8342   Max.   : 2.4585  
     ##                                        NA's   :1390      NA's   :1390     
     ##       PC3         
-    ##  Min.   :-2.7721  
-    ##  1st Qu.:-0.7103  
-    ##  Median :-0.0034  
-    ##  Mean   : 0.0021  
-    ##  3rd Qu.: 0.7302  
-    ##  Max.   : 2.8666  
+    ##  Min.   :-2.7750  
+    ##  1st Qu.:-0.7125  
+    ##  Median :-0.0054  
+    ##  Mean   : 0.0000  
+    ##  3rd Qu.: 0.7286  
+    ##  Max.   : 2.8651  
     ##  NA's   :1390
 
-### PCA for Feature Extraction
+## ICA for Dimensionality Reduction on the Boston Housing Dataset
 
 ``` r
-insurance_pca_fe <- princomp(cor(insurance[, c(6,8)]))
-summary(insurance_pca_fe)
-```
-
-    ## Importance of components:
-    ##                          Comp.1 Comp.2
-    ## Standard deviation     0.698738      0
-    ## Proportion of Variance 1.000000      0
-    ## Cumulative Proportion  1.000000      1
-
-#### Scree Plot
-
-``` r
-factoextra::fviz_eig(insurance_pca_fe, addlabels = TRUE)
-```
-
-![](Project_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
-
-#### Loading Values
-
-``` r
-insurance_pca_fe$rating[, 1:2]
-```
-
-    ## NULL
-
-``` r
-factoextra::fviz_cos2(insurance_pca_fe, choice = "var", axes = 1:2)
-```
-
-![](Project_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
-
-#### Biplot and Cos2 Combined Plot
-
-``` r
-factoextra::fviz_pca_var(insurance_pca_fe, col.var = "cos2",
-                         gradient.cols = c("red", "orange", "green"),
-                         repel = TRUE)
-```
-
-![](Project_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
-
-### ICA for Dimensionality Reduction on the Boston Housing Dataset
-
-``` r
-summary(insurance)
+summary(insurance_obs)
 ```
 
     ##  insurance.name      packagePrice      services          priceRage        
-    ##  Length:19999       Min.   :  6001   Length:19999       Length:19999      
+    ##  Length:18609       Min.   :  6001   Length:18609       Length:18609      
     ##  Class :character   1st Qu.: 40045   Class :character   Class :character  
     ##  Mode  :character   Median : 73103   Mode  :character   Mode  :character  
     ##                     Mean   : 72979                                        
     ##                     3rd Qu.:106008                                        
     ##                     Max.   :140000                                        
-    ##                     NA's   :1390                                          
-    ##  packageType             age        preIllness            rating     
-    ##  Length:19999       Min.   : 0.0   Length:19999       Min.   :1.000  
-    ##  Class :character   1st Qu.:19.0   Class :character   1st Qu.:2.000  
-    ##  Mode  :character   Median :39.0   Mode  :character   Median :3.000  
-    ##                     Mean   :39.7                      Mean   :2.994  
-    ##                     3rd Qu.:60.0                      3rd Qu.:4.000  
-    ##                     Max.   :80.0                      Max.   :5.000  
-    ##                                                                      
+    ##  packageType             age         preIllness            rating 
+    ##  Length:18609       Min.   : 0.00   Length:18609       Min.   :1  
+    ##  Class :character   1st Qu.:20.00   Class :character   1st Qu.:2  
+    ##  Mode  :character   Median :40.00   Mode  :character   Median :3  
+    ##                     Mean   :39.73                      Mean   :3  
+    ##                     3rd Qu.:60.00                      3rd Qu.:4  
+    ##                     Max.   :80.00                      Max.   :5  
     ##  transactionNo     
-    ##  Length:19999      
+    ##  Length:18609      
     ##  Class :character  
     ##  Mode  :character  
-    ##                    
     ##                    
     ##                    
     ## 
 
 ``` r
-model_of_the_transform <- preProcess(insurance,
+model_of_the_transform <- preProcess(insurance_obs,
                                      method = c("scale", "center", "ica"),
                                      n.comp = 3)
 print(model_of_the_transform)
@@ -1231,18 +1201,598 @@ summary(insurance_ica_dr)
     ##                                                                             
     ##                                                                             
     ##   preIllness        transactionNo           ICA1              ICA2        
-    ##  Length:19999       Length:19999       Min.   :-1.7234   Min.   :-1.7300  
-    ##  Class :character   Class :character   1st Qu.:-0.8566   1st Qu.:-0.8572  
-    ##  Mode  :character   Mode  :character   Median : 0.0014   Median : 0.0070  
-    ##                                        Mean   : 0.0012   Mean   : 0.0055  
-    ##                                        3rd Qu.: 0.8641   3rd Qu.: 0.8673  
-    ##                                        Max.   : 1.7479   Max.   : 1.7407  
+    ##  Length:19999       Length:19999       Min.   :-1.7472   Min.   :-1.7508  
+    ##  Class :character   Class :character   1st Qu.:-0.8628   1st Qu.:-0.8572  
+    ##  Mode  :character   Mode  :character   Median : 0.0002   Median :-0.0032  
+    ##                                        Mean   : 0.0000   Mean   : 0.0000  
+    ##                                        3rd Qu.: 0.8580   3rd Qu.: 0.8533  
+    ##                                        Max.   : 1.7252   Max.   : 1.7492  
     ##                                        NA's   :1390      NA's   :1390     
     ##       ICA3        
-    ##  Min.   :-1.7494  
-    ##  1st Qu.:-0.8532  
-    ##  Median : 0.0028  
+    ##  Min.   :-1.7349  
+    ##  1st Qu.:-0.8618  
+    ##  Median :-0.0014  
     ##  Mean   : 0.0000  
-    ##  3rd Qu.: 0.8573  
-    ##  Max.   : 1.7510  
+    ##  3rd Qu.: 0.8628  
+    ##  Max.   : 1.7352  
     ##  NA's   :1390
+
+# Resampling methods
+
+## Split the dataset
+
+``` r
+train_index <- createDataPartition(insurance_obs$rating,
+                                   p = 0.75,
+                                   list = FALSE)
+insurance_obs_train <- insurance_obs[train_index, ]
+insurance_obs_test <- insurance_obs[-train_index, ]
+```
+
+## Single Format
+
+``` r
+library(arules)
+```
+
+    ## Loading required package: Matrix
+
+    ## 
+    ## Attaching package: 'Matrix'
+
+    ## The following objects are masked from 'package:tidyr':
+    ## 
+    ##     expand, pack, unpack
+
+    ## 
+    ## Attaching package: 'arules'
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     recode
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     abbreviate, write
+
+``` r
+transactions_single_format <-
+  read.transactions("data/transactions_single_format.csv",
+                    format = "single", cols = c(1, 2))
+
+inspect(head(transactions_single_format))
+```
+
+    ##     items    transactionID
+    ## [1] {item3,} 2,{item2,    
+    ## [2] {item3,} 3,{item1,    
+    ## [3] {item3,} 4,{item1,    
+    ## [4] {item3,} 5,{item1,    
+    ## [5] {item3}} 6,{item1,    
+    ## [6] {item3}} 7,{item1,
+
+``` r
+print(transactions_single_format)
+```
+
+    ## transactions in sparse format with
+    ##  7 transactions (rows) and
+    ##  3 items (columns)
+
+## Basket Format
+
+``` r
+library(arules)
+
+transactions_basket_format_listings <-
+  read.transactions("data/transactions_basket_format.csv",
+                    format = "basket", sep = ",", cols = 2)
+summary(transactions_basket_format_listings)  # Summary of the transactions
+```
+
+    ## transactions as itemMatrix in sparse format with
+    ##  20 rows (elements/itemsets/transactions) and
+    ##  8 columns (items) and a density of 0.125 
+    ## 
+    ## most frequent items:
+    ##       1       2       3       4       5 (Other) 
+    ##       3       3       3       3       3       5 
+    ## 
+    ## element (itemset/transaction) length distribution:
+    ## sizes
+    ##  1 
+    ## 20 
+    ## 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##       1       1       1       1       1       1 
+    ## 
+    ## includes extended item information - examples:
+    ##   labels
+    ## 1      1
+    ## 2      2
+    ## 3      3
+    ## 
+    ## includes extended transaction information - examples:
+    ##   transactionID
+    ## 1          item
+    ## 2         item1
+    ## 3         item2
+
+``` r
+inspect(transactions_basket_format_listings)  # View the transactions
+```
+
+    ##      items transactionID
+    ## [1]  {TID} item         
+    ## [2]  {1}   item1        
+    ## [3]  {1}   item2        
+    ## [4]  {1}   item3        
+    ## [5]  {2}   item2        
+    ## [6]  {2}   item3        
+    ## [7]  {2}   item4        
+    ## [8]  {3}   item1        
+    ## [9]  {3}   item3        
+    ## [10] {3}   item5        
+    ## [11] {4}   item1        
+    ## [12] {4}   item3        
+    ## [13] {4}   item5        
+    ## [14] {5}   item1        
+    ## [15] {5}   item3        
+    ## [16] {5}   item5        
+    ## [17] {6}   item1        
+    ## [18] {6}   item3        
+    ## [19] {7}   item1        
+    ## [20] {7}   item3
+
+## Create a transaction data using the “basket format”
+
+``` r
+transaction_data_insurance <-
+  plyr::ddply(insurance_obs,
+    c("insurance.name","services", "priceRage", "age", "preIllness"),
+    function(df1) paste(df1$rating, collapse = ","))
+
+View(transaction_data_insurance)
+```
+
+### Record only the `items` variable
+
+``` r
+library(dplyr)
+
+transaction_data_insurance <-
+  transaction_data_insurance %>%
+  dplyr::select("items" = V1)%>% 
+  mutate(items = paste("{", items, "}", sep = ""))
+
+View(transaction_data_insurance)
+```
+
+## Save the transactions in CSV format
+
+``` r
+write.csv(transaction_data_insurance,
+          "data/transactions_basket_format_insurance.csv",
+          quote = FALSE, row.names = FALSE)
+```
+
+## Read the transactions from the CSV file
+
+``` r
+tr_insurance <-
+  read.transactions("data/transactions_basket_format_insurance.csv",
+    format = "basket",
+    header = TRUE,
+    rm.duplicates = TRUE,
+    sep = ","
+  )
+```
+
+    ## distribution of transactions with duplicates:
+    ## items
+    ##   1   2   3   4 
+    ## 401  62   9   1
+
+``` r
+print(tr_insurance)
+```
+
+    ## transactions in sparse format with
+    ##  3770 transactions (rows) and
+    ##  164 items (columns)
+
+``` r
+summary(tr_insurance)
+```
+
+    ## transactions as itemMatrix in sparse format with
+    ##  3770 rows (elements/itemsets/transactions) and
+    ##  164 columns (items) and a density of 0.02919874 
+    ## 
+    ## most frequent items:
+    ##     3.3     1.1     4.8       3     3.9 (Other) 
+    ##     314     293     290     288     288   16580 
+    ## 
+    ## element (itemset/transaction) length distribution:
+    ## sizes
+    ##   1   2   3   4   5   6   7   8   9  10  11  12  13 
+    ## 306 428 545 579 558 461 350 228 155  86  44  19  11 
+    ## 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##   1.000   3.000   5.000   4.789   6.000  13.000 
+    ## 
+    ## includes extended item information - examples:
+    ##   labels
+    ## 1     {1
+    ## 2   {1.1
+    ## 3  {1.1}
+
+## Basic EDA
+
+``` r
+library(RColorBrewer)
+
+itemFrequencyPlot(tr_insurance, topN = 10, type = "absolute",
+                  col = brewer.pal(8, "Pastel2"),
+                  main = "Absolute Item Frequency Plot",
+                  horiz = TRUE,
+                  mai = c(1, 1, 1, 0.9))
+```
+
+![](Project_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
+
+``` r
+itemFrequencyPlot(tr_insurance, topN = 10, type = "relative",
+                  col = brewer.pal(8, "Pastel2"),
+                  main = "Relative Item Frequency Plot",
+                  horiz = TRUE,
+                  mai = c(1, 1, 1, 0.9))
+```
+
+![](Project_files/figure-gfm/unnamed-chunk-46-2.png)<!-- -->
+
+## Create the association rules
+
+``` r
+library(arulesViz)
+association_rules_insurance <- apriori(tr_insurance,
+                             parameter = list(support = 0.01,
+                                              confidence = 0.05,
+                                              maxlen = 10)) 
+```
+
+    ## Apriori
+    ## 
+    ## Parameter specification:
+    ##  confidence minval smax arem  aval originalSupport maxtime support minlen
+    ##        0.05    0.1    1 none FALSE            TRUE       5    0.01      1
+    ##  maxlen target  ext
+    ##      10  rules TRUE
+    ## 
+    ## Algorithmic control:
+    ##  filter tree heap memopt load sort verbose
+    ##     0.1 TRUE TRUE  FALSE TRUE    2    TRUE
+    ## 
+    ## Absolute minimum support count: 37 
+    ## 
+    ## set item appearances ...[0 item(s)] done [0.00s].
+    ## set transactions ...[164 item(s), 3770 transaction(s)] done [0.00s].
+    ## sorting and recoding items ... [122 item(s)] done [0.00s].
+    ## creating transaction tree ... done [0.00s].
+    ## checking subsets of size 1 2 done [0.00s].
+    ## writing ... [59 rule(s)] done [0.00s].
+    ## creating S4 object  ... done [0.00s].
+
+``` r
+#Print the association rules to view the top 10 rules
+summary(association_rules_insurance)
+```
+
+    ## set of 59 rules
+    ## 
+    ## rule length distribution (lhs + rhs):sizes
+    ##  1  2 
+    ## 39 20 
+    ## 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##   1.000   1.000   1.000   1.339   2.000   2.000 
+    ## 
+    ## summary of quality measures:
+    ##     support          confidence         coverage            lift      
+    ##  Min.   :0.01008   Min.   :0.06260   Min.   :0.06764   Min.   :1.000  
+    ##  1st Qu.:0.01088   1st Qu.:0.06963   1st Qu.:0.07732   1st Qu.:1.000  
+    ##  Median :0.06844   Median :0.07507   Median :1.00000   Median :1.000  
+    ##  Mean   :0.05092   Mean   :0.09571   Mean   :0.68619   Mean   :1.314  
+    ##  3rd Qu.:0.07374   3rd Qu.:0.13612   3rd Qu.:1.00000   3rd Qu.:1.819  
+    ##  Max.   :0.08329   Max.   :0.16471   Max.   :1.00000   Max.   :2.141  
+    ##      count    
+    ##  Min.   : 38  
+    ##  1st Qu.: 41  
+    ##  Median :258  
+    ##  Mean   :192  
+    ##  3rd Qu.:278  
+    ##  Max.   :314  
+    ## 
+    ## mining info:
+    ##          data ntransactions support confidence
+    ##  tr_insurance          3770    0.01       0.05
+    ##                                                                                            call
+    ##  apriori(data = tr_insurance, parameter = list(support = 0.01, confidence = 0.05, maxlen = 10))
+
+``` r
+inspect(association_rules_insurance)
+```
+
+    ##      lhs      rhs   support    confidence coverage   lift     count
+    ## [1]  {}    => {4.3} 0.06259947 0.06259947 1.00000000 1.000000 236  
+    ## [2]  {}    => {1.9} 0.06259947 0.06259947 1.00000000 1.000000 236  
+    ## [3]  {}    => {4.5} 0.06631300 0.06631300 1.00000000 1.000000 250  
+    ## [4]  {}    => {2.7} 0.06578249 0.06578249 1.00000000 1.000000 248  
+    ## [5]  {}    => {2.2} 0.06631300 0.06631300 1.00000000 1.000000 250  
+    ## [6]  {}    => {4.1} 0.06816976 0.06816976 1.00000000 1.000000 257  
+    ## [7]  {}    => {3.8} 0.06896552 0.06896552 1.00000000 1.000000 260  
+    ## [8]  {}    => {2.4} 0.06870027 0.06870027 1.00000000 1.000000 259  
+    ## [9]  {}    => {1.6} 0.06816976 0.06816976 1.00000000 1.000000 257  
+    ## [10] {}    => {2.1} 0.06976127 0.06976127 1.00000000 1.000000 263  
+    ## [11] {}    => {1.7} 0.06763926 0.06763926 1.00000000 1.000000 255  
+    ## [12] {}    => {4.7} 0.07082228 0.07082228 1.00000000 1.000000 267  
+    ## [13] {}    => {4}   0.06843501 0.06843501 1.00000000 1.000000 258  
+    ## [14] {}    => {3.2} 0.06896552 0.06896552 1.00000000 1.000000 260  
+    ## [15] {}    => {3.6} 0.06790451 0.06790451 1.00000000 1.000000 256  
+    ## [16] {}    => {2.6} 0.06843501 0.06843501 1.00000000 1.000000 258  
+    ## [17] {}    => {2.9} 0.07002653 0.07002653 1.00000000 1.000000 264  
+    ## [18] {}    => {3.5} 0.07241379 0.07241379 1.00000000 1.000000 273  
+    ## [19] {}    => {2.3} 0.06949602 0.06949602 1.00000000 1.000000 262  
+    ## [20] {}    => {3.7} 0.07214854 0.07214854 1.00000000 1.000000 272  
+    ## [21] {}    => {4.2} 0.07161804 0.07161804 1.00000000 1.000000 270  
+    ## [22] {}    => {3.4} 0.07108753 0.07108753 1.00000000 1.000000 268  
+    ## [23] {}    => {4.9} 0.07427056 0.07427056 1.00000000 1.000000 280  
+    ## [24] {}    => {1.4} 0.07320955 0.07320955 1.00000000 1.000000 276  
+    ## [25] {}    => {3}   0.07639257 0.07639257 1.00000000 1.000000 288  
+    ## [26] {}    => {1.8} 0.07533156 0.07533156 1.00000000 1.000000 284  
+    ## [27] {}    => {2.5} 0.07559682 0.07559682 1.00000000 1.000000 285  
+    ## [28] {}    => {2}   0.07267905 0.07267905 1.00000000 1.000000 274  
+    ## [29] {}    => {4.6} 0.07506631 0.07506631 1.00000000 1.000000 283  
+    ## [30] {}    => {1.5} 0.07453581 0.07453581 1.00000000 1.000000 281  
+    ## [31] {}    => {4.4} 0.07480106 0.07480106 1.00000000 1.000000 282  
+    ## [32] {}    => {1.2} 0.07506631 0.07506631 1.00000000 1.000000 283  
+    ## [33] {}    => {2.8} 0.07427056 0.07427056 1.00000000 1.000000 280  
+    ## [34] {}    => {1.1} 0.07771883 0.07771883 1.00000000 1.000000 293  
+    ## [35] {}    => {3.1} 0.07533156 0.07533156 1.00000000 1.000000 284  
+    ## [36] {}    => {1.3} 0.07612732 0.07612732 1.00000000 1.000000 287  
+    ## [37] {}    => {3.9} 0.07639257 0.07639257 1.00000000 1.000000 288  
+    ## [38] {}    => {4.8} 0.07692308 0.07692308 1.00000000 1.000000 290  
+    ## [39] {}    => {3.3} 0.08328912 0.08328912 1.00000000 1.000000 314  
+    ## [40] {1.7} => {4.8} 0.01114058 0.16470588 0.06763926 2.141176  42  
+    ## [41] {4.8} => {1.7} 0.01114058 0.14482759 0.07692308 2.141176  42  
+    ## [42] {4}   => {4.2} 0.01007958 0.14728682 0.06843501 2.056560  38  
+    ## [43] {4.2} => {4}   0.01007958 0.14074074 0.07161804 2.056560  38  
+    ## [44] {3.2} => {4.9} 0.01007958 0.14615385 0.06896552 1.967857  38  
+    ## [45] {4.9} => {3.2} 0.01007958 0.13571429 0.07427056 1.967857  38  
+    ## [46] {3.6} => {1.1} 0.01034483 0.15234375 0.06790451 1.960191  39  
+    ## [47] {1.1} => {3.6} 0.01034483 0.13310580 0.07771883 1.960191  39  
+    ## [48] {2.6} => {3.1} 0.01061008 0.15503876 0.06843501 2.058085  40  
+    ## [49] {3.1} => {2.6} 0.01061008 0.14084507 0.07533156 2.058085  40  
+    ## [50] {2.9} => {1.1} 0.01087533 0.15530303 0.07002653 1.998268  41  
+    ## [51] {1.1} => {2.9} 0.01087533 0.13993174 0.07771883 1.998268  41  
+    ## [52] {1.8} => {3.1} 0.01140584 0.15140845 0.07533156 2.009894  43  
+    ## [53] {3.1} => {1.8} 0.01140584 0.15140845 0.07533156 2.009894  43  
+    ## [54] {1.8} => {3.3} 0.01034483 0.13732394 0.07533156 1.648762  39  
+    ## [55] {3.3} => {1.8} 0.01034483 0.12420382 0.08328912 1.648762  39  
+    ## [56] {1.2} => {1.1} 0.01061008 0.14134276 0.07506631 1.818642  40  
+    ## [57] {1.1} => {1.2} 0.01061008 0.13651877 0.07771883 1.818642  40  
+    ## [58] {1.2} => {3.3} 0.01007958 0.13427562 0.07506631 1.612163  38  
+    ## [59] {3.3} => {1.2} 0.01007958 0.12101911 0.08328912 1.612163  38
+
+``` r
+# To view the top 10 rules
+inspect(association_rules_insurance[1:10])
+```
+
+    ##      lhs    rhs   support    confidence coverage lift count
+    ## [1]  {}  => {4.3} 0.06259947 0.06259947 1        1    236  
+    ## [2]  {}  => {1.9} 0.06259947 0.06259947 1        1    236  
+    ## [3]  {}  => {4.5} 0.06631300 0.06631300 1        1    250  
+    ## [4]  {}  => {2.7} 0.06578249 0.06578249 1        1    248  
+    ## [5]  {}  => {2.2} 0.06631300 0.06631300 1        1    250  
+    ## [6]  {}  => {4.1} 0.06816976 0.06816976 1        1    257  
+    ## [7]  {}  => {3.8} 0.06896552 0.06896552 1        1    260  
+    ## [8]  {}  => {2.4} 0.06870027 0.06870027 1        1    259  
+    ## [9]  {}  => {1.6} 0.06816976 0.06816976 1        1    257  
+    ## [10] {}  => {2.1} 0.06976127 0.06976127 1        1    263
+
+``` r
+plot(association_rules_insurance)
+```
+
+    ## To reduce overplotting, jitter is added! Use jitter = 0 to prevent jitter.
+
+![](Project_files/figure-gfm/unnamed-chunk-47-1.png)<!-- --> \### Remove
+redundant rules
+
+``` r
+subset_rules <-
+  which(colSums(is.subset(association_rules_insurance,
+                          association_rules_insurance)) > 1)
+length(subset_rules)
+```
+
+    ## [1] 20
+
+``` r
+association_rules_no_reps <- association_rules_insurance[-subset_rules]
+
+summary(association_rules_no_reps)
+```
+
+    ## set of 39 rules
+    ## 
+    ## rule length distribution (lhs + rhs):sizes
+    ##  1 
+    ## 39 
+    ## 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##       1       1       1       1       1       1 
+    ## 
+    ## summary of quality measures:
+    ##     support          confidence         coverage      lift       count    
+    ##  Min.   :0.06260   Min.   :0.06260   Min.   :1   Min.   :1   Min.   :236  
+    ##  1st Qu.:0.06844   1st Qu.:0.06844   1st Qu.:1   1st Qu.:1   1st Qu.:258  
+    ##  Median :0.07162   Median :0.07162   Median :1   Median :1   Median :270  
+    ##  Mean   :0.07162   Mean   :0.07162   Mean   :1   Mean   :1   Mean   :270  
+    ##  3rd Qu.:0.07507   3rd Qu.:0.07507   3rd Qu.:1   3rd Qu.:1   3rd Qu.:283  
+    ##  Max.   :0.08329   Max.   :0.08329   Max.   :1   Max.   :1   Max.   :314  
+    ## 
+    ## mining info:
+    ##          data ntransactions support confidence
+    ##  tr_insurance          3770    0.01       0.05
+    ##                                                                                            call
+    ##  apriori(data = tr_insurance, parameter = list(support = 0.01, confidence = 0.05, maxlen = 10))
+
+``` r
+inspect(association_rules_no_reps)
+```
+
+    ##      lhs    rhs   support    confidence coverage lift count
+    ## [1]  {}  => {4.3} 0.06259947 0.06259947 1        1    236  
+    ## [2]  {}  => {1.9} 0.06259947 0.06259947 1        1    236  
+    ## [3]  {}  => {4.5} 0.06631300 0.06631300 1        1    250  
+    ## [4]  {}  => {2.7} 0.06578249 0.06578249 1        1    248  
+    ## [5]  {}  => {2.2} 0.06631300 0.06631300 1        1    250  
+    ## [6]  {}  => {4.1} 0.06816976 0.06816976 1        1    257  
+    ## [7]  {}  => {3.8} 0.06896552 0.06896552 1        1    260  
+    ## [8]  {}  => {2.4} 0.06870027 0.06870027 1        1    259  
+    ## [9]  {}  => {1.6} 0.06816976 0.06816976 1        1    257  
+    ## [10] {}  => {2.1} 0.06976127 0.06976127 1        1    263  
+    ## [11] {}  => {1.7} 0.06763926 0.06763926 1        1    255  
+    ## [12] {}  => {4.7} 0.07082228 0.07082228 1        1    267  
+    ## [13] {}  => {4}   0.06843501 0.06843501 1        1    258  
+    ## [14] {}  => {3.2} 0.06896552 0.06896552 1        1    260  
+    ## [15] {}  => {3.6} 0.06790451 0.06790451 1        1    256  
+    ## [16] {}  => {2.6} 0.06843501 0.06843501 1        1    258  
+    ## [17] {}  => {2.9} 0.07002653 0.07002653 1        1    264  
+    ## [18] {}  => {3.5} 0.07241379 0.07241379 1        1    273  
+    ## [19] {}  => {2.3} 0.06949602 0.06949602 1        1    262  
+    ## [20] {}  => {3.7} 0.07214854 0.07214854 1        1    272  
+    ## [21] {}  => {4.2} 0.07161804 0.07161804 1        1    270  
+    ## [22] {}  => {3.4} 0.07108753 0.07108753 1        1    268  
+    ## [23] {}  => {4.9} 0.07427056 0.07427056 1        1    280  
+    ## [24] {}  => {1.4} 0.07320955 0.07320955 1        1    276  
+    ## [25] {}  => {3}   0.07639257 0.07639257 1        1    288  
+    ## [26] {}  => {1.8} 0.07533156 0.07533156 1        1    284  
+    ## [27] {}  => {2.5} 0.07559682 0.07559682 1        1    285  
+    ## [28] {}  => {2}   0.07267905 0.07267905 1        1    274  
+    ## [29] {}  => {4.6} 0.07506631 0.07506631 1        1    283  
+    ## [30] {}  => {1.5} 0.07453581 0.07453581 1        1    281  
+    ## [31] {}  => {4.4} 0.07480106 0.07480106 1        1    282  
+    ## [32] {}  => {1.2} 0.07506631 0.07506631 1        1    283  
+    ## [33] {}  => {2.8} 0.07427056 0.07427056 1        1    280  
+    ## [34] {}  => {1.1} 0.07771883 0.07771883 1        1    293  
+    ## [35] {}  => {3.1} 0.07533156 0.07533156 1        1    284  
+    ## [36] {}  => {1.3} 0.07612732 0.07612732 1        1    287  
+    ## [37] {}  => {3.9} 0.07639257 0.07639257 1        1    288  
+    ## [38] {}  => {4.8} 0.07692308 0.07692308 1        1    290  
+    ## [39] {}  => {3.3} 0.08328912 0.08328912 1        1    314
+
+``` r
+write(association_rules_no_reps,
+      file = "rules/association_rules_based_on_rating_code.csv")
+```
+
+## Find specific rules
+
+``` r
+rating_association_rules <- # nolint
+  apriori(tr_insurance, parameter = list(supp = 0.01, conf = 0.05),
+          appearance = list(default = "rhs",
+                            rhs = "2"))
+```
+
+    ## Apriori
+    ## 
+    ## Parameter specification:
+    ##  confidence minval smax arem  aval originalSupport maxtime support minlen
+    ##        0.05    0.1    1 none FALSE            TRUE       5    0.01      1
+    ##  maxlen target  ext
+    ##      10  rules TRUE
+    ## 
+    ## Algorithmic control:
+    ##  filter tree heap memopt load sort verbose
+    ##     0.1 TRUE TRUE  FALSE TRUE    2    TRUE
+    ## 
+    ## Absolute minimum support count: 37 
+    ## 
+    ## set item appearances ...[1 item(s)] done [0.00s].
+    ## set transactions ...[164 item(s), 3770 transaction(s)] done [0.00s].
+    ## sorting and recoding items ... [122 item(s)] done [0.00s].
+    ## creating transaction tree ... done [0.00s].
+    ## checking subsets of size 1 done [0.00s].
+    ## writing ... [39 rule(s)] done [0.00s].
+    ## creating S4 object  ... done [0.00s].
+
+``` r
+inspect(head(rating_association_rules))
+```
+
+    ##     lhs    rhs   support    confidence coverage lift count
+    ## [1] {}  => {4.3} 0.06259947 0.06259947 1        1    236  
+    ## [2] {}  => {1.9} 0.06259947 0.06259947 1        1    236  
+    ## [3] {}  => {4.5} 0.06631300 0.06631300 1        1    250  
+    ## [4] {}  => {2.2} 0.06631300 0.06631300 1        1    250  
+    ## [5] {}  => {2.7} 0.06578249 0.06578249 1        1    248  
+    ## [6] {}  => {4.1} 0.06816976 0.06816976 1        1    257
+
+## Visualize the rules
+
+### Filter rules with confidence greater than 0.85 or 85%
+
+``` r
+rules_to_plot <-
+  association_rules_insurance[quality(association_rules_insurance)$confidence > 0.08] # nolint
+#Plot SubRules
+plot(rules_to_plot)
+```
+
+    ## To reduce overplotting, jitter is added! Use jitter = 0 to prevent jitter.
+
+![](Project_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
+
+``` r
+plot(rules_to_plot, method = "two-key plot")
+```
+
+    ## To reduce overplotting, jitter is added! Use jitter = 0 to prevent jitter.
+
+![](Project_files/figure-gfm/unnamed-chunk-50-2.png)<!-- -->
+
+``` r
+top_10_rules_to_plot <- head(rules_to_plot, n = 10, by = "confidence")
+plot(top_10_rules_to_plot, method = "graph",  engine = "htmlwidget")
+```
+
+![](Project_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
+
+``` r
+#saveAsGraph(head(rules_to_plot, n = 1000, by = "lift"),
+           # file = #"graph/association_rules_prod_no_reps.graphml")
+```
+
+### Filter top 20 rules with highest lift
+
+``` r
+rules_to_plot_by_lift <- head(rules_to_plot, n = 20, by = "lift")
+plot(rules_to_plot_by_lift, method = "paracoord")
+```
+
+![](Project_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
+
+``` r
+plot(top_10_rules_to_plot, method = "grouped")
+```
+
+    ## Registered S3 methods overwritten by 'registry':
+    ##   method               from 
+    ##   print.registry_field proxy
+    ##   print.registry_entry proxy
+
+![](Project_files/figure-gfm/unnamed-chunk-52-2.png)<!-- -->
